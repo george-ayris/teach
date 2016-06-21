@@ -6,6 +6,7 @@ type Msg
   = QuestionAdded
   | QuestionRemoved Int
   | QuestionUpdated Int UpdateType
+  | FormTitleUpdated String
 
 type UpdateType
   = TypeChanged QuestionType

@@ -3,6 +3,7 @@ import Utils
 import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo)
 import Messages exposing (Msg(..), UpdateType(..))
 import Views exposing (view)
+import String
 
 main =
   App.program
@@ -14,12 +15,15 @@ main =
 
 init : (Model, Cmd Msg)
 init =
-  (Model [] 0, Cmd.none)
+  (Model "My First Form" [] 0, Cmd.none)
 
 -- UPDATE
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg ({questions, uid} as model) =
   case msg of
+    FormTitleUpdated newTitle ->
+      ({ model | title = newTitle }, Cmd.none)
+
     QuestionAdded ->
       ({ model
         | questions = questions ++ [{ id = uid, questionType = ShortAnswer, title = "" }]
@@ -35,7 +39,15 @@ update msg ({questions, uid} as model) =
           ({ model | questions = List.map (updateQuestionTitle newTitle id) questions }, Cmd.none)
 
         TypeChanged newType ->
-          ({ model | questions = List.map (updateQuestionType newType id) questions }, Cmd.none)
+          let
+            addOptionIfMultipleChoice questionType =
+              case questionType of
+                MultipleChoice _ ->
+                  Utils.createCmd <| QuestionUpdated id MultipleChoiceOptionAdded
+                _ -> Cmd.none
+          in
+            ({ model | questions = List.map (updateQuestionType newType id) questions }
+            , addOptionIfMultipleChoice newType)
 
         MultipleChoiceOptionAdded ->
           ({ model | questions = List.map (addMultipleChoiceOption id) questions }, Cmd.none)

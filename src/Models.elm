@@ -1,7 +1,8 @@
 module Models exposing (..)
 
 type alias Model =
-  { questions : List Question
+  { title : String
+  , questions : List Question
   , uid : Int
   }
 

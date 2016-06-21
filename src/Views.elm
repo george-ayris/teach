@@ -9,6 +9,7 @@ import Views.Styling exposing (..)
 import String
 import Color
 import FontAwesome
+import Json.Decode as Json
 
 questionPlaceholder = "What do you want to ask?"
 optionPlaceholder = "Option X"
@@ -16,18 +17,29 @@ optionPlaceholder = "Option X"
 view : Model -> Html Msg
 view model =
   div [ style mainContainer ]
-    [ div [ style mainPanel ]
-        [ h1 [ style panelHeading ] [ text "Form Builder" ]
+    [ div [ style columnSpacer ] []
+    , div [ style mainPanel ]
+        [ h1 [ style panelHeading
+             , contenteditable True
+             , on "blur" (Json.map FormTitleUpdated targetTextContent)
+             , value model.title
+             ] [ text model.title ]
         , div []
             [ div [] (List.map renderControl model.questions)
             , button [ onClick QuestionAdded ] [ text "Add question" ]
             ]
         ]
+    , div [ style columnSpacer ] []
     , div [ style mainPanel ]
-        [ h1 [ style panelHeading ] [ text "Form Renderer" ]
+        [ h1 [ style panelHeading ] [ text model.title ]
         , div [] (List.map renderOutput model.questions)
         ]
+    , div [ style columnSpacer ] []
     ]
+
+targetTextContent : Json.Decoder String
+targetTextContent =
+  Json.at ["target", "textContent"] Json.string
 
 renderControl : Question -> Html Msg
 renderControl ({ id, questionType, title } as question) =
@@ -99,11 +111,11 @@ renderOutput { id, questionType, title } =
       MultipleChoice { options, uid } ->
         div []
           [ div [] [ text title' ]
-          , Html.form [] (List.map (renderMultipleChoiceOption id) options)
+          , Html.form [] (List.map (renderMultipleChoiceOutput id) options)
           ]
 
-renderMultipleChoiceOption : Int -> Option -> Html Msg
-renderMultipleChoiceOption id option =
+renderMultipleChoiceOutput : Int -> Option -> Html Msg
+renderMultipleChoiceOutput id option =
   div []
    [ input [ type' "radio", name <| "Question " ++ (toString id), value option.value ] []
    , text (if String.isEmpty option.value then optionPlaceholder else option.value)
