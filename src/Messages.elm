@@ -5,5 +5,11 @@ import Models exposing (..)
 type Msg
   = QuestionAdded
   | QuestionRemoved Int
-  | QuestionTitleUpdated Int String
-  | QuestionTypeChanged Int QuestionType
+  | QuestionUpdated Int UpdateType
+
+type UpdateType
+  = TypeChanged QuestionType
+  | TitleUpdated String
+  | MultipleChoiceOptionAdded
+  | MultipleChoiceOptionRemoved Int
+  | MultipleChoiceOptionUpdated Int String

@@ -4,14 +4,14 @@ import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Models exposing (..)
-import Messages exposing (Msg(..))
+import Messages exposing (Msg(..), UpdateType(..))
 import Views.Styling exposing (..)
 import String
 import Color
 import FontAwesome
 
-questionPlaceholder : String
 questionPlaceholder = "What do you want to ask?"
+optionPlaceholder = "Option X"
 
 view : Model -> Html Msg
 view model =
@@ -20,7 +20,7 @@ view model =
         [ h1 [ style panelHeading ] [ text "Form Builder" ]
         , div []
             [ div [] (List.map renderControl model.questions)
-            , button [ onClick QuestionAdded ] [ text "Add Question" ]
+            , button [ onClick QuestionAdded ] [ text "Add question" ]
             ]
         ]
     , div [ style mainPanel ]
@@ -30,20 +30,49 @@ view model =
     ]
 
 renderControl : Question -> Html Msg
-renderControl { id, questionType, title } =
+renderControl ({ id, questionType, title } as question) =
   div []
-    [ input [ type' "text", placeholder questionPlaceholder, onInput (QuestionTitleUpdated id) ] [ text title ]
+    [ input [ type' "text", placeholder questionPlaceholder, onInput (QuestionUpdated id << TitleUpdated) ] [ text title ]
     , select [ onInput <| questionTypeChanged id ] renderQuestionTypes
-    , span [ style svgContainer, onClick <| QuestionRemoved id ] [ FontAwesome.close Color.red 18 ]
+    , removeButton <| QuestionRemoved id
+    , renderSpecificQuestionControl question
+    ]
+
+removeButton : Msg -> Html Msg
+removeButton msg =
+  span [ style svgContainer, onClick <| msg ] [ FontAwesome.close Color.red 18 ]
+
+renderSpecificQuestionControl : Question -> Html Msg
+renderSpecificQuestionControl ({ id, questionType, title } as question) =
+  case questionType of
+    ShortAnswer ->
+      span [] []
+
+    MultipleChoice { options } ->
+      div [] <| List.concat
+        [ List.map (renderOption id) options
+        , [ div [] [ button [ onClick <| QuestionUpdated id <| MultipleChoiceOptionAdded ] [ text "Add option" ]]]
+        ]
+
+renderOption : Int -> Option -> Html Msg
+renderOption questionId option =
+  div []
+    [ input
+        [ type' "text"
+        , placeholder optionPlaceholder
+        , onInput (QuestionUpdated questionId << MultipleChoiceOptionUpdated option.id)
+        , value option.value
+        ] [ text option.value ]
+    , removeButton <| QuestionUpdated questionId <| MultipleChoiceOptionRemoved option.id
     ]
 
 questionTypeChanged : Int -> String -> Msg
 questionTypeChanged id string =
-  QuestionTypeChanged id (stringToQuestionType string)
+  QuestionUpdated id <| TypeChanged (stringToQuestionType string)
 
 renderQuestionTypes : List (Html Msg)
 renderQuestionTypes =
-  [ ShortAnswer, MultipleChoice ] |> List.map renderQuestionType
+  [ ShortAnswer, MultipleChoice { options = [], uid = 0 } ]|> List.map renderQuestionType
 
 renderQuestionType : QuestionType -> Html Msg
 renderQuestionType questionType =
@@ -53,7 +82,7 @@ prettyPrint : QuestionType -> String
 prettyPrint questionType =
   case questionType of
     ShortAnswer -> "Short answer"
-    MultipleChoice -> "Multiple choice"
+    MultipleChoice _ -> "Multiple choice"
 
 renderOutput : Question -> Html Msg
 renderOutput { id, questionType, title } =
@@ -66,5 +95,16 @@ renderOutput { id, questionType, title } =
           [ div [] [ text title' ]
           , textarea [] []
           ]
-      MultipleChoice ->
-        text "Hello"
+
+      MultipleChoice { options, uid } ->
+        div []
+          [ div [] [ text title' ]
+          , Html.form [] (List.map (renderMultipleChoiceOption id) options)
+          ]
+
+renderMultipleChoiceOption : Int -> Option -> Html Msg
+renderMultipleChoiceOption id option =
+  div []
+   [ input [ type' "radio", name <| "Question " ++ (toString id), value option.value ] []
+   , text (if String.isEmpty option.value then optionPlaceholder else option.value)
+   ]

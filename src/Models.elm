@@ -13,16 +13,26 @@ type alias Question =
 
 type QuestionType
   = ShortAnswer
-  | MultipleChoice
+  | MultipleChoice MultipleChoiceInfo
+
+type alias MultipleChoiceInfo =
+  { options : List Option
+  , uid : Int
+  }
+
+type alias Option =
+  { id : Int
+  , value : String
+  }
 
 questionTypeToString : QuestionType -> String
 questionTypeToString questionType =
   case questionType of
     ShortAnswer -> "ShortAnswer"
-    MultipleChoice -> "MultipleChoice"
+    MultipleChoice _ -> "MultipleChoice"
 
 stringToQuestionType : String -> QuestionType
 stringToQuestionType string =
   if string == "ShortAnswer"
   then ShortAnswer
-  else MultipleChoice
+  else MultipleChoice { options = [], uid = 0 }
