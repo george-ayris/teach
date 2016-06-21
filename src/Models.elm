@@ -7,9 +7,22 @@ type alias Model =
 
 type alias Question =
   { id : Int
-  , type' : QuestionType
+  , questionType : QuestionType
   , title : String
   }
 
 type QuestionType
   = ShortAnswer
+  | MultipleChoice
+
+questionTypeToString : QuestionType -> String
+questionTypeToString questionType =
+  case questionType of
+    ShortAnswer -> "ShortAnswer"
+    MultipleChoice -> "MultipleChoice"
+
+stringToQuestionType : String -> QuestionType
+stringToQuestionType string =
+  if string == "ShortAnswer"
+  then ShortAnswer
+  else MultipleChoice
