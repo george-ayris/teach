@@ -35,7 +35,7 @@ update msg ({questions, uid} as model) =
       , Cmd.none)
 
     QuestionRemoved id ->
-      ({ model | questions = List.filter (\q -> q.id /= id) questions }, Cmd.none)
+      ({ model | questions = renumberQuestions <| List.filter (\q -> q.id /= id) questions }, Cmd.none)
 
     QuestionUpdated id updateType ->
       case updateType of
@@ -61,6 +61,14 @@ update msg ({questions, uid} as model) =
 
         MultipleChoiceOptionUpdated optionId newValue ->
           ({ model | questions = List.map (updateMultipleChoiceOption id optionId newValue) questions }, Cmd.none)
+
+renumberQuestions : List Question -> List Question
+renumberQuestions =
+  let
+    numberQuestion index question =
+      { question | questionNumber = index + 1 }
+  in
+    List.indexedMap numberQuestion 
 
 updateQuestionTitle : String -> Int -> Question -> Question
 updateQuestionTitle newTitle id =
@@ -96,7 +104,7 @@ updateMultipleChoiceInfo updateFunction questionId =
       case question of
         MultipleChoice choiceInfo ->
           MultipleChoice <| updateFunction choiceInfo
-          
+
         _ -> question
   in
     updateListItem (\q -> { q | questionType = updateChoiceInfo q.questionType }) questionId
