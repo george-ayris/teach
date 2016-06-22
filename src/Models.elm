@@ -17,6 +17,7 @@ type QuestionType
   = ShortAnswer
   | MediumAnswer
   | LongAnswer
+  | TrueFalse
   | MultipleChoice MultipleChoiceInfo
 
 type alias MultipleChoiceInfo =
@@ -35,6 +36,7 @@ questionTypeToString questionType =
     ShortAnswer -> "ShortAnswer"
     MediumAnswer -> "MediumAnswer"
     LongAnswer -> "LongAnswer"
+    TrueFalse -> "TrueFalse"
     MultipleChoice _ -> "MultipleChoice"
 
 stringToQuestionType : String -> QuestionType
@@ -42,4 +44,5 @@ stringToQuestionType string =
   if string == "ShortAnswer" then ShortAnswer
   else if string == "MediumAnswer" then MediumAnswer
   else if string == "LongAnswer" then LongAnswer
+  else if string == "TrueFalse" then TrueFalse
   else MultipleChoice { options = [], uid = 0 }

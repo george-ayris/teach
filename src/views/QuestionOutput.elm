@@ -30,10 +30,13 @@ questionSpecificContent { id, questionType } =
     LongAnswer ->
       textarea [ style writtenQuestionInput, rows 8, placeholder "A paragraph expected" ] []
 
+    TrueFalse ->
+      Html.form [] (List.map (renderMultipleChoiceOutput id) [{ value = "True" }, { value = "False" }])
+
     MultipleChoice { options } ->
       Html.form [] (List.map (renderMultipleChoiceOutput id) options)
 
-renderMultipleChoiceOutput : Int -> Option -> Html Msg
+renderMultipleChoiceOutput : Int -> { a | value : String } -> Html Msg
 renderMultipleChoiceOutput id option =
   div []
    [ input [ type' "radio", name <| "Question " ++ (toString id), value option.value ] []

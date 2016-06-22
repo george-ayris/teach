@@ -17,7 +17,7 @@ renderQuestionSpecificControl ({ id, questionType, title } as question) =
         , [ div [] [ button [ onClick <| QuestionUpdated id <| MultipleChoiceOptionAdded ] [ text "Add option" ]]]
         ]
 
-    _ -> span [] []
+    _ -> text ""
 
 renderOption : Int -> Option -> Html Msg
 renderOption questionId option =

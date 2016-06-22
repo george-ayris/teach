@@ -43,7 +43,12 @@ questionTypeChanged id string =
 
 renderQuestionTypes : List (Html Msg)
 renderQuestionTypes =
-  [ ShortAnswer, MediumAnswer, LongAnswer, MultipleChoice { options = [], uid = 0 } ]|> List.map renderQuestionType
+  [ ShortAnswer
+  , MediumAnswer
+  , LongAnswer
+  , TrueFalse
+  , MultipleChoice { options = [], uid = 0 } ]
+  |> List.map renderQuestionType
 
 renderQuestionType : QuestionType -> Html Msg
 renderQuestionType questionType =
@@ -55,4 +60,5 @@ prettyPrint questionType =
     ShortAnswer -> "Short answer"
     MediumAnswer -> "Medium answer"
     LongAnswer -> "Long answer"
+    TrueFalse -> "True/false"
     MultipleChoice _ -> "Multiple choice"

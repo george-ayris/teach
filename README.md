@@ -1,7 +1,4 @@
-# Question Types #
-- True/False
-
-## Online questions ##
+# Online questions #
 - Maths questions with working
 
 # Features #
