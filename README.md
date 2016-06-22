@@ -1,9 +1,5 @@
 # Question Types #
 - True/False
-- Written answer (adjustable box with standard size)
-  - a few words
-  - couple of sentences
-  - full paragraph
 
 ## Online questions ##
 - Maths questions with working
