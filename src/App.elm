@@ -15,7 +15,7 @@ main =
 
 init : (Model, Cmd Msg)
 init =
-  (Model "My First Form" [] 0, Cmd.none)
+  (Model "My First Worksheet" [] 0, Cmd.none)
 
 -- UPDATE
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -26,7 +26,11 @@ update msg ({questions, uid} as model) =
 
     QuestionAdded ->
       ({ model
-        | questions = questions ++ [{ id = uid, questionType = ShortAnswer, title = "" }]
+        | questions = questions ++ [{ id = uid
+                                    , questionType = ShortAnswer
+                                    , title = ""
+                                    , questionNumber = (List.length questions) + 1
+                                    }]
         , uid = uid + 1 }
       , Cmd.none)
 
@@ -90,11 +94,10 @@ updateMultipleChoiceInfo updateFunction questionId =
   let
     updateChoiceInfo question =
       case question of
-        ShortAnswer ->
-          ShortAnswer
-
         MultipleChoice choiceInfo ->
           MultipleChoice <| updateFunction choiceInfo
+          
+        _ -> question
   in
     updateListItem (\q -> { q | questionType = updateChoiceInfo q.questionType }) questionId
 

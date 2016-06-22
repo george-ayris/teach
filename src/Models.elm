@@ -8,12 +8,15 @@ type alias Model =
 
 type alias Question =
   { id : Int
+  , questionNumber : Int
   , questionType : QuestionType
   , title : String
   }
 
 type QuestionType
   = ShortAnswer
+  | MediumAnswer
+  | LongAnswer
   | MultipleChoice MultipleChoiceInfo
 
 type alias MultipleChoiceInfo =
@@ -30,10 +33,13 @@ questionTypeToString : QuestionType -> String
 questionTypeToString questionType =
   case questionType of
     ShortAnswer -> "ShortAnswer"
+    MediumAnswer -> "MediumAnswer"
+    LongAnswer -> "LongAnswer"
     MultipleChoice _ -> "MultipleChoice"
 
 stringToQuestionType : String -> QuestionType
 stringToQuestionType string =
-  if string == "ShortAnswer"
-  then ShortAnswer
+  if string == "ShortAnswer" then ShortAnswer
+  else if string == "MediumAnswer" then MediumAnswer
+  else if string == "LongAnswer" then LongAnswer
   else MultipleChoice { options = [], uid = 0 }

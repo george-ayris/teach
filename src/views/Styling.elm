@@ -33,6 +33,17 @@ svgContainer =
   , verticalAlign "middle"
   ]
 
+questionStyle =
+  [ paddingBottom standardPadding
+  , paddingTop standardPadding
+  ]
+
+writtenQuestionInput =
+  [ ("box-sizing", "border-box")
+  , ("resize", "none")
+  , width (pc 100)
+  ]
+
 -- Styles for composition
 globalStyles =
   [ fontFamily "Helvetica" ]

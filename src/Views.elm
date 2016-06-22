@@ -32,7 +32,7 @@ view model =
     , div [ style columnSpacer ] []
     , div [ style mainPanel ]
         [ h1 [ style panelHeading ] [ text model.title ]
-        , div [] (List.map renderOutput model.questions)
+        , div [] (List.indexedMap (renderOutput <| List.length model.questions) model.questions)
         ]
     , div [ style columnSpacer ] []
     ]
@@ -57,14 +57,13 @@ removeButton msg =
 renderSpecificQuestionControl : Question -> Html Msg
 renderSpecificQuestionControl ({ id, questionType, title } as question) =
   case questionType of
-    ShortAnswer ->
-      span [] []
-
     MultipleChoice { options } ->
       div [] <| List.concat
         [ List.map (renderOption id) options
         , [ div [] [ button [ onClick <| QuestionUpdated id <| MultipleChoiceOptionAdded ] [ text "Add option" ]]]
         ]
+
+    _ -> span [] []
 
 renderOption : Int -> Option -> Html Msg
 renderOption questionId option =
@@ -84,7 +83,7 @@ questionTypeChanged id string =
 
 renderQuestionTypes : List (Html Msg)
 renderQuestionTypes =
-  [ ShortAnswer, MultipleChoice { options = [], uid = 0 } ]|> List.map renderQuestionType
+  [ ShortAnswer, MediumAnswer, LongAnswer, MultipleChoice { options = [], uid = 0 } ]|> List.map renderQuestionType
 
 renderQuestionType : QuestionType -> Html Msg
 renderQuestionType questionType =
@@ -94,25 +93,41 @@ prettyPrint : QuestionType -> String
 prettyPrint questionType =
   case questionType of
     ShortAnswer -> "Short answer"
+    MediumAnswer -> "Medium answer"
+    LongAnswer -> "Long answer"
     MultipleChoice _ -> "Multiple choice"
 
-renderOutput : Question -> Html Msg
-renderOutput { id, questionType, title } =
+renderOutput : Int -> Int -> Question -> Html Msg
+renderOutput listLength currentIndex question =
+  if (listLength - 1) == currentIndex
+  then renderOutputWith (text "") question
+  else renderOutputWith (hr [] []) question
+
+renderOutputWith : Html Msg -> Question -> Html Msg
+renderOutputWith htmlElem ({ id, questionType, title, questionNumber } as question) =
   let
     title' = if String.isEmpty title then questionPlaceholder else title
   in
-    case questionType of
-      ShortAnswer ->
-        div []
-          [ div [] [ text title' ]
-          , textarea [] []
-          ]
+    div []
+      [ div [ style questionStyle ] [ text <| (toString questionNumber) ++ ". " ++ title' ]
+      , div [] [ questionSpecificContent question ]
+      , htmlElem
+      ]
 
-      MultipleChoice { options, uid } ->
-        div []
-          [ div [] [ text title' ]
-          , Html.form [] (List.map (renderMultipleChoiceOutput id) options)
-          ]
+questionSpecificContent : Question -> Html Msg
+questionSpecificContent { id, questionType } =
+  case questionType of
+    ShortAnswer ->
+      textarea [ style writtenQuestionInput, rows 1, placeholder "A few words expected" ] []
+
+    MediumAnswer ->
+      textarea [ style writtenQuestionInput, rows 4, placeholder "A couple of sentences expected" ] []
+
+    LongAnswer ->
+      textarea [ style writtenQuestionInput, rows 8, placeholder "A paragraph expected" ] []
+
+    MultipleChoice { options } ->
+      Html.form [] (List.map (renderMultipleChoiceOutput id) options)
 
 renderMultipleChoiceOutput : Int -> Option -> Html Msg
 renderMultipleChoiceOutput id option =
