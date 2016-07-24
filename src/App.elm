@@ -15,7 +15,7 @@ main =
 
 init : (Model, Cmd Msg)
 init =
-  (Model "My First Worksheet" [] 0, Cmd.none)
+  (Model "My Worksheet" [] 0, Cmd.none)
 
 -- UPDATE
 update : Msg -> Model -> (Model, Cmd Msg)
