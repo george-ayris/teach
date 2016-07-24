@@ -14,7 +14,7 @@ renderQuestionSpecificControl ({ id, questionType, title } as question) =
     MultipleChoice { options } ->
       div [] <| List.concat
         [ List.map (renderOption id) options
-        , [ div [] [ button [ onClick <| QuestionUpdated id <| MultipleChoiceOptionAdded ] [ text "Add option" ]]]
+        , [ div [] [ button [ onClick <| QuestionUpdated id MultipleChoiceOptionAdded ] [ text "Add option" ]]]
         ]
 
     _ -> text ""

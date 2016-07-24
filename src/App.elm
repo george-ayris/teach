@@ -1,7 +1,7 @@
 import Html.App as App
 import Utils
 import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo)
-import Messages exposing (Msg(..), UpdateType(..))
+import Messages exposing (Msg(..), UpdateType(..), QuestionOrderingInfo)
 import Views exposing (view)
 import String
 
@@ -37,6 +37,9 @@ update msg ({questions, uid} as model) =
     QuestionRemoved id ->
       ({ model | questions = renumberQuestions <| List.filter (\q -> q.id /= id) questions }, Cmd.none)
 
+    QuestionOrderChanged newOrderInfo ->
+      ({ model | questions = moveQuestion newOrderInfo questions }, Cmd.none)
+
     QuestionUpdated id updateType ->
       case updateType of
         TitleUpdated newTitle ->
@@ -68,7 +71,31 @@ renumberQuestions =
     numberQuestion index question =
       { question | questionNumber = index + 1 }
   in
-    List.indexedMap numberQuestion 
+    List.indexedMap numberQuestion
+
+moveQuestion : QuestionOrderingInfo -> List Question -> List Question
+moveQuestion { oldQuestionNumber, newQuestionNumber } questions =
+  let
+    questionHasMovedUp = newQuestionNumber < oldQuestionNumber
+
+    questionAffectedByMove questionNumber =
+      if questionHasMovedUp
+      then (oldQuestionNumber > questionNumber) && (questionNumber >= newQuestionNumber)
+      else (newQuestionNumber >= questionNumber) && (questionNumber > oldQuestionNumber)
+
+    reorderQuestion ({ questionNumber } as question) =
+      if questionNumber == oldQuestionNumber
+      then { question | questionNumber = newQuestionNumber }
+      else if questionAffectedByMove questionNumber
+      then if questionHasMovedUp
+           then { question | questionNumber = questionNumber + 1 }
+           else { question | questionNumber = questionNumber - 1 }
+      else question
+    in
+      questions
+      |> List.map reorderQuestion
+      |> List.sortBy (\x -> x.questionNumber)
+
 
 updateQuestionTitle : String -> Int -> Question -> Question
 updateQuestionTitle newTitle id =

@@ -13,4 +13,17 @@ optionPlaceholder = "Option X"
 
 removeButton : Msg -> Html Msg
 removeButton msg =
-  span [ style svgContainer, onClick <| msg ] [ FontAwesome.close Color.red 18 ]
+  fontIconContainer msg <| FontAwesome.close Color.red 18
+
+upButton : Msg -> Html Msg
+upButton msg =
+  fontIconContainer msg <| FontAwesome.arrow_up Color.black 18
+
+downButton : Msg -> Html Msg
+downButton msg =
+  fontIconContainer msg <| FontAwesome.arrow_down Color.black 18
+
+
+fontIconContainer : Msg -> Html Msg -> Html Msg
+fontIconContainer msg icon =
+  span [ style svgContainer, onClick <| msg ] [ icon ]

@@ -6,6 +6,7 @@ type Msg
   = QuestionAdded
   | QuestionRemoved Int
   | QuestionUpdated Int UpdateType
+  | QuestionOrderChanged QuestionOrderingInfo
   | FormTitleUpdated String
 
 type UpdateType
@@ -14,3 +15,8 @@ type UpdateType
   | MultipleChoiceOptionAdded
   | MultipleChoiceOptionRemoved Int
   | MultipleChoiceOptionUpdated Int String
+
+type alias QuestionOrderingInfo =
+  { oldQuestionNumber : Int
+  , newQuestionNumber : Int
+  }

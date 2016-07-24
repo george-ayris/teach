@@ -19,7 +19,7 @@ renderWorksheetControls model =
          , value model.title
          ] [ text model.title ]
     , div []
-        [ div [] (List.map renderControl model.questions)
+        [ div [] (List.indexedMap (renderControl <| List.length model.questions) model.questions)
         , button [ onClick QuestionAdded ] [ text "Add question" ]
         ]
     ]
@@ -28,14 +28,28 @@ targetTextContent : Json.Decoder String
 targetTextContent =
   Json.at ["target", "textContent"] Json.string
 
-renderControl : Question -> Html Msg
-renderControl ({ id, questionType, title } as question) =
-  div []
-    [ input [ type' "text", placeholder R.questionPlaceholder, onInput (QuestionUpdated id << TitleUpdated) ] [ text title ]
-    , select [ onInput <| questionTypeChanged id ] renderQuestionTypes
-    , R.removeButton <| QuestionRemoved id
-    , renderQuestionSpecificControl question
-    ]
+renderControl : Int -> Int -> Question -> Html Msg
+renderControl listLength index ({ id, questionType, title, questionNumber } as question) =
+  let
+   isFirstElement = index == 0
+   isLastElement = index == listLength - 1
+  in
+    div []
+      [ input
+          [ type' "text", placeholder R.questionPlaceholder
+          , onInput (QuestionUpdated id << TitleUpdated)
+          , value title ]
+          [ text title ]
+      , select [ onInput <| questionTypeChanged id, value <| questionTypeToString questionType ] renderQuestionTypes
+      , if isFirstElement
+        then text ""
+        else R.upButton <| QuestionOrderChanged { oldQuestionNumber = questionNumber, newQuestionNumber = questionNumber - 1 }
+      , if isLastElement
+        then text ""
+        else R.downButton <| QuestionOrderChanged { oldQuestionNumber = questionNumber, newQuestionNumber = questionNumber + 1 }
+      , R.removeButton <| QuestionRemoved id
+      , renderQuestionSpecificControl question
+      ]
 
 questionTypeChanged : Int -> String -> Msg
 questionTypeChanged id string =
