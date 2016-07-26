@@ -35,7 +35,7 @@ update msg ({questions, uid} as model) =
       , Cmd.none)
 
     QuestionRemoved id ->
-      ({ model | questions = renumberQuestions <| removeQuestionWithId id questions }, Cmd.none)
+      ({ model | questions = removeQuestionWithId id questions }, Cmd.none)
 
     QuestionOrderChanged newOrderInfo ->
       ({ model | questions = moveQuestion newOrderInfo questions }, Cmd.none)
@@ -77,7 +77,7 @@ renumberQuestions =
     List.indexedMap numberQuestion
 
 moveQuestion : QuestionOrderingInfo -> List Question -> List Question
-moveQuestion { oldQuestionNumber, newQuestionNumber } questions =
+moveQuestion ({ oldQuestionNumber, newQuestionNumber, id } as orderingInfo) questions =
   let
     questionHasMovedUp = newQuestionNumber < oldQuestionNumber
 
@@ -95,9 +95,27 @@ moveQuestion { oldQuestionNumber, newQuestionNumber } questions =
            else { question | questionNumber = questionNumber - 1 }
       else question
     in
-      questions
-      |> List.map reorderQuestion
-      |> List.sortBy (\x -> x.questionNumber)
+      if listContainsQuestion id questions
+      then
+        questions
+        |> List.map reorderQuestion
+        |> List.sortBy (\x -> x.questionNumber)
+      else
+        case id of
+          ParentId parentId _ ->
+            List.map (updateListItem (moveQuestionInSubQuestion orderingInfo) (Id parentId)) questions
+
+          _ -> questions
+
+moveQuestionInSubQuestion : QuestionOrderingInfo -> Question -> Question
+moveQuestionInSubQuestion orderingInfo question =
+  case question.questionType of
+    SubQuestionContainer subQuestions ->
+      { question
+      | questionType = SubQuestionContainer <| moveQuestion orderingInfo subQuestions
+      }
+
+    _ -> question
 
 addSubQuestion : Int -> Question -> Question
 addSubQuestion uid q =
@@ -195,7 +213,7 @@ updateQuestionInSubQuestion updateFunction id question =
 removeQuestionWithId : QuestionId -> List Question -> List Question
 removeQuestionWithId id questions =
   if listContainsQuestion id questions
-  then List.filter (\q -> q.id /= id) questions
+  then renumberQuestions <| List.filter (\q -> q.id /= id) questions
   else
     case id of
       ParentId parentId _ ->
@@ -203,6 +221,7 @@ removeQuestionWithId id questions =
 
       _ -> questions
 
+removeQuestionInSubQuestion : QuestionId -> Question -> Question
 removeQuestionInSubQuestion id question  =
   case question.questionType of
     SubQuestionContainer subQuestions ->
