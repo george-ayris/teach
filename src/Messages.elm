@@ -4,10 +4,11 @@ import Models exposing (..)
 
 type Msg
   = QuestionAdded
-  | QuestionRemoved Int
-  | QuestionUpdated Int UpdateType
+  | QuestionRemoved QuestionId
+  | QuestionUpdated QuestionId UpdateType
   | QuestionOrderChanged QuestionOrderingInfo
   | FormTitleUpdated String
+  | SubQuestionAdded QuestionId
 
 type UpdateType
   = TypeChanged QuestionType
@@ -19,4 +20,5 @@ type UpdateType
 type alias QuestionOrderingInfo =
   { oldQuestionNumber : Int
   , newQuestionNumber : Int
+  , id : QuestionId
   }

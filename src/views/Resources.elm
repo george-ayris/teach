@@ -23,7 +23,6 @@ downButton : Msg -> Html Msg
 downButton msg =
   fontIconContainer msg <| FontAwesome.arrow_down Color.black 18
 
-
 fontIconContainer : Msg -> Html Msg -> Html Msg
 fontIconContainer msg icon =
   span [ style svgContainer, onClick <| msg ] [ icon ]
