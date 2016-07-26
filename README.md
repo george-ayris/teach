@@ -21,10 +21,9 @@ https://george-ayris.github.io/teach/
 
 # Bugs/Tech debt #
 - Max on number of sub questions
-- Ordering of sub questions
 - Properly deal with limit to nesting in sub questions
 
 # Requirements # 
-Python features currently require (working with Python 2.7):
-pytesseract - https://pypi.python.org/pypi/pytesseract/0.1
-slate - https://pypi.python.org/pypi/slate
+- Python features currently require (working with Python 2.7):
+- pytesseract - https://pypi.python.org/pypi/pytesseract/0.1
+- slate - https://pypi.python.org/pypi/slate
