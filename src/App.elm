@@ -189,23 +189,40 @@ listContainsQuestion : QuestionId -> List Question -> Bool
 listContainsQuestion id questions =
   List.any (\q -> q.id == id) questions
 
-updateQuestionWithId : (Question -> Question) -> QuestionId -> List Question -> List Question
-updateQuestionWithId updateFunction id questions =
-  if listContainsQuestion id questions
-  then List.map (updateListItem updateFunction id) questions
-  else
-    case id of
-      ParentId parentId _ ->
-        List.map (updateListItem (updateQuestionInSubQuestion updateFunction id) (Id parentId)) questions
+updateQuestionWithId updateFunction questionId questions =
+  updateQuestionWithId' updateFunction questionId questionId questions
 
-      _ -> questions
+updateQuestionWithId' : (Question -> Question) -> QuestionId -> QuestionId -> List Question -> List Question
+updateQuestionWithId' updateFunction questionId searchId questions =
+  let
+    searchChildren parentId childId =
+      List.map (updateListItem (updateQuestionInSubQuestion updateFunction questionId childId) parentId) questions
+  in
+    if listContainsQuestion questionId questions
+    then List.map (updateListItem updateFunction questionId) questions
+    else
+      case searchId of
+        ParentId grandparentId (ParentId parentId childId) ->
+          searchChildren (Id grandparentId) (ParentId grandparentId (Id parentId))
 
-updateQuestionInSubQuestion : (Question -> Question) -> QuestionId -> Question -> Question
-updateQuestionInSubQuestion updateFunction id question =
+        ParentId parentId (Id childId) ->
+          case questionId of
+            ParentId grandparentId (ParentId parentId childId) ->
+              searchChildren (ParentId grandparentId (Id parentId)) childId
+
+            ParentId parentId (Id childId) ->
+                searchChildren (Id parentId) (Id childId)
+
+            _ -> questions
+
+        _ -> questions
+
+updateQuestionInSubQuestion : (Question -> Question) -> QuestionId -> QuestionId -> Question -> Question
+updateQuestionInSubQuestion updateFunction questionId searchId question =
   case question.questionType of
     SubQuestionContainer subQuestions ->
       { question
-      | questionType = SubQuestionContainer <| updateQuestionWithId updateFunction id subQuestions
+      | questionType = SubQuestionContainer <| updateQuestionWithId' updateFunction questionId searchId subQuestions
       }
 
     _ -> question
