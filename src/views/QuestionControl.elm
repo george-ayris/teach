@@ -23,7 +23,7 @@ renderControl listLength index ({ id, questionType, title, questionNumber } as q
           , onInput (QuestionUpdated id << TitleUpdated)
           , value title ]
           [ text title ]
-      , select [ onInput <| questionTypeChanged id, value <| questionTypeToString questionType ] renderQuestionTypes
+      , select [ onInput <| questionTypeChanged id, value <| questionTypeToString questionType ] (renderQuestionTypes id)
       , if isFirstElement
         then text ""
         else R.upButton questionMovedUp
@@ -38,16 +38,22 @@ questionTypeChanged : QuestionId -> String -> Msg
 questionTypeChanged id string =
   QuestionUpdated id <| TypeChanged (stringToQuestionType string)
 
-renderQuestionTypes : List (Html Msg)
-renderQuestionTypes =
-  [ ShortAnswer
-  , MediumAnswer
-  , LongAnswer
-  , TrueFalse
-  , MultipleChoice { options = [], uid = 0 }
-  , SubQuestionContainer []
-  ]
-  |> List.map renderQuestionType
+renderQuestionTypes : QuestionId -> List (Html Msg)
+renderQuestionTypes id =
+  let
+    questionTypes =
+      [ ShortAnswer
+      , MediumAnswer
+      , LongAnswer
+      , TrueFalse
+      , MultipleChoice { options = [], uid = 0 }
+      ]
+  in
+    case id of
+      ParentId _ (ParentId _ (Id _)) ->
+        List.map renderQuestionType questionTypes
+      _ ->
+        List.map renderQuestionType <| questionTypes ++ [ SubQuestionContainer [] ]
 
 renderQuestionType : QuestionType -> Html Msg
 renderQuestionType questionType =
