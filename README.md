@@ -19,6 +19,7 @@ https://george-ayris.github.io/teach/
 - Colour questions?
 
 # Bugs #
+- Max on number of sub questions
 
 # Requirements # 
 Python features currently require (working with Python 2.7):

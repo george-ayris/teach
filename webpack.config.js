@@ -1,4 +1,5 @@
-var path = require("path");
+var path = require('path');
+var webpack = require('webpack');
 
 module.exports = {
   entry: {
@@ -12,8 +13,6 @@ module.exports = {
     filename: 'bundle.js',
   },
 
-  watch: true,
-
   module: {
     loaders: [{
       test: /\.elm$/,
@@ -25,6 +24,8 @@ module.exports = {
       loader:  'file?name=[name].[ext]',
     }]
   },
+
+  plugins: [ new webpack.OldWatchingPlugin() ],
 
   devServer: {
     inline: true,

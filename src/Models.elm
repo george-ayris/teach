@@ -7,11 +7,15 @@ type alias Model =
   }
 
 type alias Question =
-  { id : Int
+  { id : QuestionId
   , questionNumber : Int
   , questionType : QuestionType
   , title : String
   }
+
+type QuestionId
+  = Id Int
+  | ParentId Int QuestionId
 
 type QuestionType
   = ShortAnswer
@@ -19,6 +23,7 @@ type QuestionType
   | LongAnswer
   | TrueFalse
   | MultipleChoice MultipleChoiceInfo
+  | SubQuestionContainer (List Question)
 
 type alias MultipleChoiceInfo =
   { options : List Option
@@ -38,6 +43,7 @@ questionTypeToString questionType =
     LongAnswer -> "LongAnswer"
     TrueFalse -> "TrueFalse"
     MultipleChoice _ -> "MultipleChoice"
+    SubQuestionContainer _ -> "SubQuestionContainer"
 
 stringToQuestionType : String -> QuestionType
 stringToQuestionType string =
@@ -45,4 +51,5 @@ stringToQuestionType string =
   else if string == "MediumAnswer" then MediumAnswer
   else if string == "LongAnswer" then LongAnswer
   else if string == "TrueFalse" then TrueFalse
-  else MultipleChoice { options = [], uid = 0 }
+  else if string == "MultipleChoice" then MultipleChoice { options = [], uid = 0 }
+  else SubQuestionContainer []
