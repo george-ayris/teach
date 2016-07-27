@@ -15,10 +15,10 @@ renderControl parentIds listLength index ({ questionType, title, questionNumber 
    isLastElement = index == listLength - 1
    questionId = parentIds ++ [ questionNumber ]
    questionMovedUp = QuestionOrderChanged { oldQuestionId = questionId
-                                          , newQuestionId = parentIds ++ [ questionNumber - 1 ]
+                                          , questionIdToMoveAfter = parentIds ++ [ questionNumber - 2 ]
                                           }
    questionMovedDown = QuestionOrderChanged { oldQuestionId = questionId
-                                            , newQuestionId = parentIds ++ [ questionNumber + 1 ]
+                                            , questionIdToMoveAfter = parentIds ++ [ questionNumber + 1 ]
                                             }
   in
     div []

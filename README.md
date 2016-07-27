@@ -20,11 +20,10 @@ https://george-ayris.github.io/teach/
 - Colour questions?
 
 # Bugs/Tech debt
-- Delete and re order don't work on third level nesting (consider making ids list indices)
+- Control drop downs reset during re-ordering of container sub questions
 - Max on number of sub questions
 - Properly deal with limit to nesting in sub questions
-- Unit test update function
-- Updates don't work on third level of nesting  
+- Switch on warn flag in compiler  
 
 # Requirements  
 - Python features currently require (working with Python 2.7):

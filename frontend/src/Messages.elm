@@ -19,5 +19,5 @@ type UpdateType
 
 type alias QuestionOrderingInfo =
   { oldQuestionId : QuestionId
-  , newQuestionId : QuestionId
+  , questionIdToMoveAfter : QuestionId
   }

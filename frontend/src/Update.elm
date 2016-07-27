@@ -22,8 +22,8 @@ update msg ({questions} as model) =
     QuestionRemoved id ->
       ({ model | questions = removeQuestionWithId id questions }, Cmd.none)
 
-    QuestionOrderChanged newOrderInfo ->
-      ({ model | questions = moveQuestion newOrderInfo questions }, Cmd.none)
+    QuestionOrderChanged { oldQuestionId, questionIdToMoveAfter } ->
+      ({ model | questions = moveQuestion oldQuestionId questionIdToMoveAfter questions }, Cmd.none)
 
     SubQuestionAdded parentId ->
       ({ model | questions = updateQuestionWithId addSubQuestion parentId questions }, Cmd.none)
@@ -53,71 +53,106 @@ update msg ({questions} as model) =
         MultipleChoiceOptionUpdated optionId newValue ->
           ({ model | questions = updateQuestionWithId (updateMultipleChoiceOption optionId newValue) id questions }, Cmd.none)
 
-renumberQuestions : List Question -> List Question
+moveQuestion : QuestionId -> QuestionId -> List Question -> List Question
+moveQuestion oldQuestionId questionIdToMoveAfter questions =
+  let
+    question = retrieveQuestion oldQuestionId questions
+  in
+    case question of
+      Just q ->
+        questions
+        |> removeQuestion oldQuestionId
+        |> addQuestion q questionIdToMoveAfter
+        |> renumberQuestions oldQuestionId
+        |> renumberQuestions questionIdToMoveAfter
+
+      Nothing -> questions
+
+retrieveQuestion : QuestionId -> List Question -> Maybe Question
+retrieveQuestion questionId questions =
+    case questionId of
+      (a::[]) ->
+        findQuestionInList a questions
+
+      (a::b) ->
+        case findQuestionInList a questions of
+          Just question ->
+            case question.questionType of
+              SubQuestionContainer subQuestions ->
+                retrieveQuestion b subQuestions
+
+              _ -> Nothing
+
+          Nothing -> Nothing
+
+      [] -> Nothing
+
+findQuestionInList : Int -> List Question -> Maybe Question
+findQuestionInList a list =
+  let
+    question = List.filter (\q -> q.questionNumber == a) list
+  in
+    case question of
+      (q::[]) -> Just q
+      _       -> Nothing
+
+removeQuestion : QuestionId -> List Question -> List Question
+removeQuestion =
+  let
+    removeQuestionWithNumber n = List.filter (\q -> q.questionNumber /= n)
+  in
+    mapOntoQuestionsInHierachy removeQuestionWithNumber
+
+addQuestion : Question -> QuestionId -> List Question -> List Question
+addQuestion question questionIdToAddAfter =
+  let
+    addQuestionAfterNumber n questions =
+      let
+        (before, after) =
+          List.partition (\q -> q.questionNumber <= n) questions
+      in
+        before ++ [question] ++ after
+  in
+    mapOntoQuestionsInHierachy addQuestionAfterNumber questionIdToAddAfter
+
+renumberQuestions : QuestionId -> List Question -> List Question
 renumberQuestions =
+    mapOntoQuestionsInHierachy (\_ -> renumberQuestionList)
+
+renumberQuestionList : List Question -> List Question
+renumberQuestionList =
   let
     numberQuestion index question =
       { question | questionNumber = index + 1 }
   in
     List.indexedMap numberQuestion
 
-moveQuestion : QuestionOrderingInfo -> List Question -> List Question
-moveQuestion ({ oldQuestionId, newQuestionId } as orderingInfo) questions =
-{-  let
-    questionHasMovedUp = newQuestionNumber < oldQuestionNumber
+mapOntoQuestionsInHierachy : (Int -> List Question -> List Question) -> QuestionId -> List Question -> List Question
+mapOntoQuestionsInHierachy processQuestions questionId questions =
+  case questionId of
+    (a::[]) ->
+      processQuestions a questions
 
-    questionAffectedByMove questionNumber =
-      if questionHasMovedUp
-      then (oldQuestionNumber > questionNumber) && (questionNumber >= newQuestionNumber)
-      else (newQuestionNumber >= questionNumber) && (questionNumber > oldQuestionNumber)
-
-    reorderQuestion ({ questionNumber } as question) =
-      if questionNumber == oldQuestionNumber
-      then { question | questionNumber = newQuestionNumber }
-      else if questionAffectedByMove questionNumber
-      then if questionHasMovedUp
-           then { question | questionNumber = questionNumber + 1 }
-           else { question | questionNumber = questionNumber - 1 }
-      else question
-    in
-      if listContainsQuestion id questions
-      then
+    (a::b) ->
+      List.map
+        (updateQuestionWithNumber
+          (mapOntoSubQuestions (mapOntoQuestionsInHierachy processQuestions b))
+          a)
         questions
-        |> List.map reorderQuestion
-        |> List.sortBy (\x -> x.questionNumber)
-      else
-        case id of
-          ParentId parentId _ ->
-            List.map (updateListItem (moveQuestionInSubQuestion orderingInfo) (Id parentId)) questions
 
-          _ -> questions -}
-    questions
+    _ -> questions
 
-moveQuestionInSubQuestion : QuestionOrderingInfo -> Question -> Question
-moveQuestionInSubQuestion orderingInfo question =
-  case question.questionType of
-    SubQuestionContainer subQuestions ->
-      { question
-      | questionType = SubQuestionContainer <| moveQuestion orderingInfo subQuestions
-      }
-
-    _ -> question
 
 addSubQuestion : Question -> Question
-addSubQuestion q =
+addSubQuestion =
   let
-    addSubQuestionToContainer : QuestionType -> QuestionType
-    addSubQuestionToContainer question =
-      case question of
-        SubQuestionContainer subQuestions ->
-          SubQuestionContainer <| subQuestions ++ [{ questionType = ShortAnswer
-                                                   , title = ""
-                                                   , questionNumber = (List.length subQuestions) + 1
-                                                   }]
-
-        _ -> question
+    addSubQuestion' subQuestions =
+      subQuestions ++ [{ questionType = ShortAnswer
+                       , title = ""
+                       , questionNumber = (List.length subQuestions) + 1
+                       }]
   in
-    { q | questionType = addSubQuestionToContainer q.questionType }
+   mapOntoSubQuestions addSubQuestion'
 
 updateQuestionTitle : String -> Question -> Question
 updateQuestionTitle newTitle q = { q | title = newTitle }
@@ -162,52 +197,48 @@ updateListItem updateFunction id item =
   then updateFunction item
   else item
 
+updateQuestionWithId : (Question -> Question) -> QuestionId -> List Question -> List Question
+updateQuestionWithId updateFunction questionId questions =
+  let
+    updateQuestionInSubQuestion questionId question =
+      mapOntoSubQuestions (updateQuestionWithId updateFunction questionId) question
+  in
+    case questionId of
+      (a::[]) ->
+        List.map (updateQuestionWithNumber updateFunction a) questions
+
+      (a::b) ->
+        List.map (updateQuestionWithNumber (updateQuestionInSubQuestion b) a) questions
+
+      [] ->
+        questions
+
+removeQuestionWithId : QuestionId -> List Question -> List Question
+removeQuestionWithId questionId questions =
+  let
+    removeQuestionInSubQuestion questionId question =
+      mapOntoSubQuestions (removeQuestionWithId questionId) question
+  in
+    case questionId of
+      (a::[]) ->
+        renumberQuestionList <| List.filter (\q -> q.questionNumber /= a) questions
+
+      (a::b) ->
+        List.map (updateQuestionWithNumber (removeQuestionInSubQuestion b) a) questions
+
+      [] ->
+        questions
+
 updateQuestionWithNumber : (Question -> Question) -> Int -> Question -> Question
 updateQuestionWithNumber updateFunction questionNumber question =
   if question.questionNumber == questionNumber
   then updateFunction question
   else question
 
-updateQuestionWithId : (Question -> Question) -> QuestionId -> List Question -> List Question
-updateQuestionWithId updateFunction questionId questions =
-  case questionId of
-    (a::[]) ->
-      List.map (updateQuestionWithNumber updateFunction a) questions
-
-    (a::b) ->
-      List.map (updateQuestionWithNumber (updateQuestionInSubQuestion updateFunction b) a) questions
-
-    [] ->
-      questions
-
-updateQuestionInSubQuestion : (Question -> Question) -> QuestionId -> Question -> Question
-updateQuestionInSubQuestion updateFunction questionId question =
+mapOntoSubQuestions : (List Question -> List Question) -> Question -> Question
+mapOntoSubQuestions f question =
   case question.questionType of
     SubQuestionContainer subQuestions ->
-      { question
-      | questionType = SubQuestionContainer <| updateQuestionWithId updateFunction questionId subQuestions
-      }
-
-    _ -> question
-
-removeQuestionWithId : QuestionId -> List Question -> List Question
-removeQuestionWithId questionId questions =
-  case questionId of
-    (a::[]) ->
-      renumberQuestions <| List.filter (\q -> q.questionNumber /= a) questions
-
-    (a::b) ->
-      List.map (updateQuestionWithNumber (removeQuestionInSubQuestion b) a) questions
-
-    [] ->
-      questions
-
-removeQuestionInSubQuestion : QuestionId -> Question -> Question
-removeQuestionInSubQuestion questionId question =
-  case question.questionType of
-    SubQuestionContainer subQuestions ->
-      { question
-      | questionType = SubQuestionContainer <| removeQuestionWithId questionId subQuestions
-      }
+      { question | questionType = SubQuestionContainer <| f subQuestions }
 
     _ -> question
