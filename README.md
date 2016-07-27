@@ -20,6 +20,7 @@ https://george-ayris.github.io/teach/
 - Colour questions?
 
 # Bugs/Tech debt
+- Delete and re order don't work on third level nesting (consider making ids list indices)
 - Max on number of sub questions
 - Properly deal with limit to nesting in sub questions
 - Unit test update function

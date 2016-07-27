@@ -18,7 +18,7 @@ renderWorksheetControls model =
          , value model.title
          ] [ text model.title ]
     , div []
-        [ div [] (List.indexedMap (renderControl <| List.length model.questions) model.questions)
+        [ div [] (List.indexedMap (renderControl [] <| List.length model.questions) model.questions)
         , button [ onClick QuestionAdded ] [ text "Add question" ]
         ]
     ]
