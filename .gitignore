@@ -1,4 +1,5 @@
 .DS_Store
+npm-debug.log
 elm-stuff/
 node_modules/
 dist/
