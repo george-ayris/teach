@@ -1,23 +1,9 @@
-import Html.App as App
+module Update exposing (update)
+
 import Utils
 import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo, QuestionId)
 import Messages exposing (Msg(..), UpdateType(..), QuestionOrderingInfo)
-import Views exposing (view)
-import String
 
-main =
-  App.program
-    { init = init
-    , view = view
-    , update = update
-    , subscriptions = \m -> Sub.none
-    }
-
-init : (Model, Cmd Msg)
-init =
-  (Model "My Worksheet" [], Cmd.none)
-
--- UPDATE
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg ({questions} as model) =
   case msg of
