@@ -22,6 +22,7 @@ https://george-ayris.github.io/teach/
 # Bugs/Tech debt 
 - Max on number of sub questions
 - Properly deal with limit to nesting in sub questions
+- Unit test update function
 
 # Requirements  
 - Python features currently require (working with Python 2.7):
