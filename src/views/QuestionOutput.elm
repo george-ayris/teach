@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Views.Styling exposing (..)
 import Views.Resources as R
 import String
+import Utils
 import Models exposing (..)
 import Messages exposing (..)
 
@@ -14,9 +15,21 @@ renderQuestionOutput ({ id, questionType, title, questionNumber } as question) =
       title' = if String.isEmpty title then R.questionPlaceholder else title
     in
       div []
-        [ div [ style questionStyle ] [ text <| (toString questionNumber) ++ ". " ++ title' ]
+        [ div [ style questionStyle ] [ text <| (toStringQuestionNumber id questionNumber) ++ ". " ++ title' ]
         , div [] [ questionSpecificContent question ]
         ]
+
+toStringQuestionNumber : QuestionId -> Int -> String
+toStringQuestionNumber id questionNumber =
+  case id of
+    Id _ ->
+      toString questionNumber
+
+    ParentId _ (Id _) ->
+      Utils.numberToLetter questionNumber
+
+    _ ->
+      Utils.numberToRoman questionNumber
 
 questionSpecificContent : Question -> Html Msg
 questionSpecificContent { id, questionType } =
@@ -36,7 +49,10 @@ questionSpecificContent { id, questionType } =
     MultipleChoice { options } ->
       Html.form [] (List.map (renderMultipleChoiceOutput id) options)
 
-renderMultipleChoiceOutput : Int -> { a | value : String } -> Html Msg
+    SubQuestionContainer questions ->
+      div [ style subQuestionContainer ] (List.map renderQuestionOutput questions)
+
+renderMultipleChoiceOutput : QuestionId -> { a | value : String } -> Html Msg
 renderMultipleChoiceOutput id option =
   div []
    [ input [ type' "radio", name <| "Question " ++ (toString id), value option.value ] []

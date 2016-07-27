@@ -38,6 +38,9 @@ questionStyle =
   , paddingTop standardPadding
   ]
 
+subQuestionContainer =
+  [ paddingLeft standardPadding ]
+
 writtenQuestionInput =
   [ ("box-sizing", "border-box")
   , ("resize", "none")
