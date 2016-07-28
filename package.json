@@ -4,7 +4,7 @@
   "description": "Help teachers focus on teaching",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "elm-make --warn frontend/test/TestRunner.elm --output dist/test.js && node dist/test.js && rm dist/test.js",
     "build": "webpack -p --config ./webpack.production.config",
     "dev": "webpack-dev-server --port 3000 --hot"
   },

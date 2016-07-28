@@ -72,6 +72,7 @@ def get_layout(path):
 
 	return layout
 
+
 def recurse_char(objs):
 
 	charstr = []

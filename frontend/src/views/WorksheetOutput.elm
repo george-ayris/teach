@@ -23,6 +23,6 @@ renderOutput listLength currentIndex question =
 renderOutputWith : Html Msg -> Question -> Html Msg
 renderOutputWith htmlElem question =
   div []
-    [ renderQuestionOutput question
+    [ renderQuestionOutput [] question
     , htmlElem
     ]

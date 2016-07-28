@@ -4,7 +4,7 @@ var webpack = require('webpack');
 module.exports = {
   entry: {
     app: [
-      './src/index.js'
+      './frontend/src/index.js'
     ]
   },
 
@@ -17,7 +17,7 @@ module.exports = {
     loaders: [{
       test: /\.elm$/,
       exclude: [/elm-stuff/, /node_modules/],
-      loader: 'elm-hot!elm-webpack'
+      loader: 'elm-hot!elm-webpack'//?warn=true
     },{
       test:    /\.html$/,
       exclude: /node_modules/,

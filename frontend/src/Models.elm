@@ -3,19 +3,15 @@ module Models exposing (..)
 type alias Model =
   { title : String
   , questions : List Question
-  , uid : Int
   }
 
 type alias Question =
-  { id : QuestionId
-  , questionNumber : Int
+  { questionNumber : Int
   , questionType : QuestionType
   , title : String
   }
 
-type QuestionId
-  = Id Int
-  | ParentId Int QuestionId
+type alias QuestionId = List Int
 
 type QuestionType
   = ShortAnswer

@@ -3,7 +3,7 @@ var path = require("path");
 module.exports = {
   entry: {
     app: [
-      './src/index.js'
+      './frontend/src/index.js'
     ]
   },
 
@@ -16,7 +16,7 @@ module.exports = {
     loaders: [{
       test: /\.elm$/,
       exclude: [/elm-stuff/, /node_modules/],
-      loader: 'elm-webpack'
+      loader: 'elm-webpack'//?warn=true'
     },{
       test:    /\.html$/,
       exclude: /node_modules/,

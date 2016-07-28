@@ -18,7 +18,6 @@ type UpdateType
   | MultipleChoiceOptionUpdated Int String
 
 type alias QuestionOrderingInfo =
-  { oldQuestionNumber : Int
-  , newQuestionNumber : Int
-  , id : QuestionId
+  { oldQuestionId : QuestionId
+  , questionIdToMoveAfter : QuestionId
   }

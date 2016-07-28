@@ -8,46 +8,57 @@ import Messages exposing (..)
 import Views.Styling exposing (..)
 import Views.Resources as R
 
-renderControl : Int -> Int -> Question -> Html Msg
-renderControl listLength index ({ id, questionType, title, questionNumber } as question) =
+renderControl : QuestionId -> Int -> Int -> Question -> Html Msg
+renderControl parentIds listLength index ({ questionType, title, questionNumber } as question) =
   let
    isFirstElement = index == 0
    isLastElement = index == listLength - 1
-   questionMovedUp = QuestionOrderChanged { oldQuestionNumber = questionNumber, newQuestionNumber = questionNumber - 1, id = id }
-   questionMovedDown = QuestionOrderChanged { oldQuestionNumber = questionNumber, newQuestionNumber = questionNumber + 1, id = id }
+   questionId = parentIds ++ [ questionNumber ]
+   questionMovedUp = QuestionOrderChanged { oldQuestionId = questionId
+                                          , questionIdToMoveAfter = parentIds ++ [ questionNumber - 2 ]
+                                          }
+   questionMovedDown = QuestionOrderChanged { oldQuestionId = questionId
+                                            , questionIdToMoveAfter = parentIds ++ [ questionNumber + 1 ]
+                                            }
   in
     div []
       [ input
           [ type' "text"
           , placeholder R.questionPlaceholder
-          , onInput (QuestionUpdated id << TitleUpdated)
+          , onInput (QuestionUpdated questionId << TitleUpdated)
           , value title ]
           [ text title ]
-      , select [ onInput <| questionTypeChanged id, value <| questionTypeToString questionType ] renderQuestionTypes
+      , select [ onInput <| questionTypeChanged questionId
+               , value <| questionTypeToString questionType
+               ] (renderQuestionTypes questionId)
       , if isFirstElement
         then text ""
         else R.upButton questionMovedUp
       , if isLastElement
         then text ""
         else R.downButton questionMovedDown
-      , R.removeButton <| QuestionRemoved id
-      , renderQuestionSpecificControl question
+      , R.removeButton <| QuestionRemoved questionId
+      , renderQuestionSpecificControl questionId question
       ]
 
 questionTypeChanged : QuestionId -> String -> Msg
 questionTypeChanged id string =
   QuestionUpdated id <| TypeChanged (stringToQuestionType string)
 
-renderQuestionTypes : List (Html Msg)
-renderQuestionTypes =
-  [ ShortAnswer
-  , MediumAnswer
-  , LongAnswer
-  , TrueFalse
-  , MultipleChoice { options = [], uid = 0 }
-  , SubQuestionContainer []
-  ]
-  |> List.map renderQuestionType
+renderQuestionTypes : QuestionId -> List (Html Msg)
+renderQuestionTypes id =
+  let
+    questionTypes =
+      [ ShortAnswer
+      , MediumAnswer
+      , LongAnswer
+      , TrueFalse
+      , MultipleChoice { options = [], uid = 0 }
+      ]
+  in
+    if List.length id > 2
+    then List.map renderQuestionType questionTypes
+    else List.map renderQuestionType <| questionTypes ++ [ SubQuestionContainer [] ]
 
 renderQuestionType : QuestionType -> Html Msg
 renderQuestionType questionType =
@@ -63,8 +74,8 @@ prettyPrint questionType =
     MultipleChoice _ -> "Multiple choice"
     SubQuestionContainer _ -> "Or add a sub-question"
 
-renderQuestionSpecificControl : Question -> Html Msg
-renderQuestionSpecificControl ({ id, questionType, title } as question) =
+renderQuestionSpecificControl : QuestionId -> Question -> Html Msg
+renderQuestionSpecificControl id ({ questionType, title } as question) =
   case questionType of
     MultipleChoice { options } ->
       div [] <| List.concat
@@ -74,7 +85,7 @@ renderQuestionSpecificControl ({ id, questionType, title } as question) =
 
     SubQuestionContainer questions ->
       div [ style subQuestionContainer ] <| List.concat
-        [ List.indexedMap (renderControl <| List.length questions) questions
+        [ List.indexedMap (renderControl id <| List.length questions) questions
         , [ button [ onClick <| SubQuestionAdded id ] [ text "Add sub-question" ] ]
         ]
 
