@@ -7,6 +7,8 @@ import pdfminer
 import pytesseract
 from PIL import Image
 
+import cairo
+
 import qclass
 
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -68,25 +70,14 @@ def get_layout(path):
 	device.close()
 	retstr.close()
 
-	#### Now do processing - LC
-	# start with first page
-	page = layout[0]
-	#charlist = []
-
-
-	charlist = recurse_char(page._objs)
-
-
-	pdb.set_trace()
-
-	return charlist
+	return layout
 
 def recurse_char(objs):
 
 	charstr = []
 	for obj in objs:
 		if type(obj) is pdfminer.layout.LTChar:
-			charstr += [ (obj.get_text(), obj.x0, obj.x1, obj.y0, obj.y1) ]
+			charstr += [ (obj.get_text(), obj.x0, obj.y0, obj.x1, obj.y1) ]
 		else:
 			try: 
 				new_objs = obj._objs
@@ -94,31 +85,9 @@ def recurse_char(objs):
 			except: 
 				charstr += []
 
-	return charstr
+	return charstr # format x0,y0,x1,y1 
 
 
-
-def main():
-
-	#textstr = pytesseract.image_to_string(Image.open('units01.jpg'))
-	#print textstr
-
-	input_doc = './Examples/HydraulicsWorksheet.pdf'
-
-	#with open(input_doc) as f: doc = slate.PDF(f)
-
-	#subprocess.call(['python','pdf2txt.py','-o','output.txt'])
-
-	chars = get_layout(input_doc)
-
-	#num_pages = len(doc)
-
-	#questions = get_questions(doc[1])
-
-	#print doc[0]
-	#print doc[1]
-
-	pdb.set_trace()
 
 def get_questions(docstr):
 
@@ -141,6 +110,77 @@ def get_questions(docstr):
 			#pdb.set_trace()
 
 	return questions
+
+def draw_page(charlist, width=612.0, height=792.0):
+
+	surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, int(width), int(height))
+	cr = cairo.Context(surface)
+	cr.scale(width,height)
+
+	cr.set_source_rgb(1.,1.,1.)
+	#cr.rectangle(0,0,612,792)
+	cr.rectangle(0,0,1,1)
+	cr.fill()
+
+
+
+
+	for char in charlist:
+		cr.set_source_rgb(0.,0.,0.)
+		cr.select_font_face("Georgia", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+		
+		#cr.set_font_size( (char[4]-char[2])/ height )
+		opts = cr.get_font_options()
+
+		pdb.set_trace()
+
+		cr.set_font_size( 0.5*( (char[3]-char[1])/ width + (char[4]-char[2])/ height) )
+
+		cwidth, cheight = char[3]-char[1], char[4]-char[2]
+		x_bearing, y_bearing, twidth, theight = cr.text_extents(char)[:4]
+		cr.set_font_size(  )
+
+
+		pdb.set_trace()
+
+		cr.move_to( char[1]/width, 1-char[2]/height ) # Here coords are down from top left
+		cr.show_text(char[0])
+
+
+	surface.write_to_png('TestImage' + '.png')
+	surface.finish()
+
+	pdb.set_trace()
+
+def main():
+
+	#textstr = pytesseract.image_to_string(Image.open('units01.jpg'))
+	#print textstr
+
+	input_doc = './Examples/rationalnums.pdf'
+
+	#with open(input_doc) as f: doc = slate.PDF(f)
+
+	#num_pages = len(doc)
+	#questions = get_questions(doc[1])
+	#print doc[0]
+	#print doc[1]
+
+	layout = get_layout(input_doc)
+	page = layout[0]
+	#charlist = []
+	charlist = recurse_char(page._objs)
+
+
+	draw_page(charlist)
+
+	pdb.set_trace()
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
