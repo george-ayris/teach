@@ -76,6 +76,7 @@ def get_layout(path):
 
 	charlist = recurse_char(page._objs)
 
+	# NEW TEXT
 
 	pdb.set_trace()
 
