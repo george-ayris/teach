@@ -47,6 +47,9 @@ writtenQuestionInput =
   , width (pc 100)
   ]
 
+endOfSubQuestion =
+  [ paddingBottom standardPadding ]
+
 -- Styles for composition
 globalStyles =
   [ fontFamily "Helvetica" ]

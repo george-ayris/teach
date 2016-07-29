@@ -13,11 +13,22 @@ tests =
                 ({ title = "", questions = [ shortAnswerQuestion ] }, Cmd.none)
                 (update QuestionAdded emptyModel)
 
+        , test "QuestionTypeChanged - when something is converted to a SubQuestionContainer then a question of the original type is added"
+            <| assertEqual
+                { modelWithThreeQuestions | questions = [ shortAnswerQuestion
+                                                         , longAnswerQuestion
+                                                         , { title = ""
+                                                           , questionNumber = 3
+                                                           , questionType = SubQuestionContainer
+                                                                              [ { multipleChoiceQuestion | questionNumber = 1 } ]
+                                                           }]}
+                (fst (update (QuestionUpdated [3] <| TypeChanged <| SubQuestionContainer []) modelWithThreeQuestions))
+
         , test "QuestionMoved - down one position"
             <| assertEqual
-                ({ modelWithThreeQuestions | questions = [ { longAnswerQuestion | questionNumber = 1 }
-                                                         , { shortAnswerQuestion | questionNumber = 2 }
-                                                         ]}
+                ({ modelWithTwoQuestions | questions = [ { longAnswerQuestion | questionNumber = 1 }
+                                                       , { shortAnswerQuestion | questionNumber = 2 }
+                                                       ]}
                 , Cmd.none)
                 (update (QuestionOrderChanged { oldQuestionId = [1], questionIdToMoveAfter = [2] }) modelWithTwoQuestions)
 
@@ -85,4 +96,4 @@ longAnswerQuestion : Question
 longAnswerQuestion = { questionNumber = 2, questionType = LongAnswer, title = "Write me an essay" }
 
 multipleChoiceQuestion : Question
-multipleChoiceQuestion = { questionNumber = 3, questionType = MultipleChoice { options = [], uid = 0 }, title = "Pick me, pick me!" }
+multipleChoiceQuestion = { questionNumber = 3, questionType = MultipleChoice { options = [{ id = 0, value = "" }], uid = 1 }, title = "Pick me, pick me!" }
