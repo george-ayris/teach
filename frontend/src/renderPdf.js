@@ -17,7 +17,7 @@ const renderPdf = model => {
   stream.on('finish', () => {
     const blob = stream.toBlob('application/pdf');
     const url = stream.toBlobURL('application/pdf');
-    window.location = url;
+    window.open(url);
   });
 };
 
