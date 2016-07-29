@@ -194,6 +194,10 @@ def sort_into_lines(charsIN, line_spacing=10):
 
 	return lines		
 
+def groups_from_lines(linesIN, spacing_lim = 10):
+	# with characters sorted into lines, we only need to search the same line,
+	# then those above and below for neighbour candidates.
+
 
 def find_groups(charsIN):
 

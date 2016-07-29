@@ -27,5 +27,4 @@ https://george-ayris.github.io/teach/
 
 # Requirements  
 - Python features currently require (working with Python 2.7):
-- pytesseract - https://pypi.python.org/pypi/pytesseract/0.1
-- slate - https://pypi.python.org/pypi/slate
+- pdfminer - https://pypi.python.org/pypi/pdfminer
