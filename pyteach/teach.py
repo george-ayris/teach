@@ -3,6 +3,8 @@ import pdb
 import subprocess
 import copy
 
+import matplotlib.pyplot as plt
+
 #import slate
 import pdfminer
 #import pytesseract
@@ -158,27 +160,35 @@ def sort_into_lines(charsIN, line_spacing=10):
 	# sort as if you were reading from top left to bottom right
 
 	# first sort the whole list by vertical distance 
-	charsy = []
+	charsy, candidates = [] ,[]
 	for char in charsIN:	
+		# Do not include whitespace characters
 		try: 
 			charstr = str(char[0])
 			if not str(char[0]) == ' ':
 				charsy.append(-char[2])
-		except: charsy.append(-char[2])
+				candidates.append(char)
+		except: 
+			charsy.append(-char[2])
+			candidates.append(char)
 
 	inds = np.argsort(charsy)
-	chars = [ charsIN[inds[ic]] for ic in range(len(inds)) ]
+	chars = [ candidates[inds[ic]] for ic in range(len(inds)) ]
+
+	for char in chars:
+		try: 
+			charstr = str(char[0])
+			if charstr == ' ': print 'YES'
+		except:
+			pass 
 
 	# next sort into lines
 	lines = []
-	iline = 0
 	while chars:
 		others = copy.copy(chars)
 		char = chars[0]
 		chars.remove(char)
 		line = [char]
-		iline += 1
-		print iline 
 		for io, other in enumerate(others[1:]): 
 			if abs(other[2] - char[2]) < line_spacing:
 				line.append(other)
@@ -199,77 +209,65 @@ def groups_from_lines(linesIN, spacing_lim = 10):
 	# then those above and below for neighbour candidates.
 
 
-def find_groups(charsIN):
-
-	chars = copy.copy(charsIN)
-
-	lim = 10 # limit that neighbours can be in a group
+def groups_from_lines(lines, distance_lim=20):
 
 	groups = [] # list of lists 
 
-	while chars:
+	## N.B. Current version does not make use of line position information!!!!!!!
+	## The plan is to make use of this information to speed things up!
+	n_lines = len(lines)
+	to_group = [] # keep track of which candidates have been added to group
+	to_group_line = []
+	for il, line in enumerate(lines):
+		for char in line: 
+			to_group.append(char)
+			to_group_line.append(il)
+	ungrouped = copy.copy(to_group) # list of all candidates
 
-		others = copy.copy(chars)
-		char = chars[0]
 
-		charx, chary = .5*(char[1]+char[3]), .5*(char[2]+char[4])	
+	while ungrouped: # while there are still ungrouped characters
 
-		distances, distx, disty = [], [], []
-		for ic, other in enumerate(chars[1:]):
-			try: 
-				letter = str(other[0])
-				if not letter == ' ':
+		group = [] # initialize new group
+
+		# start with a non-grouped character
+		char0 = ungrouped[0]
+
+		# Keep track of which candidates have been compared with current group and which havent
+		examined = []
+		to_examine = [char0]
+
+		# While there are members of the group who have not been examined
+		while to_examine:
+
+			# For each unexamined member of the group, find neighbours and add to group
+			for char in to_examine:
+				charx, chary = .5*(char[1]+char[3]), .5*(char[2]+char[4])
+
+				# Find all neighbours of the current char and add to group
+				# Only search ungrouped candidates
+				distances = []
+				for other in ungrouped:
 					otherx, othery = .5*(other[1]+other[3]), .5*(other[2]+other[4])
-					distx.append( abs(otherx-charx) )
-					disty.append( abs(othery-chary) )
 					distances.append( np.sqrt( (otherx-charx)**2 + (othery-chary)**2 ) )
-			except: pass
-		sortedi = np.argsort(np.array(distances))
-		sortedd = np.array(distances)[sortedi]
-		pdb.set_trace()
-
-		group = [chars[0]]
-		others.remove(chars[0])	
-		bGroupFull = False
-		while not bGroupFull:
-			bGroupFull = True
-
-			for member in group:
-				memx, memy = .5*(member[1]+member[3]), .5*(member[2]+member[4])				
-				for other in others:
-					otherx, othery = .5*(other[1]+other[3]), .5*(other[2]+other[4])
-					dist = np.sqrt( (otherx-memx)**2 + (othery-memy)**2 )
-					if dist < lim: # found one to add to group
-						group.append(other)
-						others.remove(other)
-						bGroupFull= False
-						break
-				if not bGroupFull:
-					break
+					if distances[-1] < distance_lim: # found a neighbour
+						group.append(other) # move the candidate into the group
 
 
-				print len(others)
-		
-		pdb.set_trace()
+				# remove memebers of group from candidates for new searches
+				ungrouped = list( set(ungrouped).difference(set(group))  ) 
+				examined.append(char)
+			
 
-		groups.append(group) # add completed group to list
-		for member in group: chars.remove(member) # remove group from candidates
+			# Update to_examine with any un examined members of the group	
+			to_examine = list( set(group).difference( set(examined) ) )	
 
+		# Remove members of group from overall characters
+		for line in lines: line = list( set(line).difference( set(group) )  )
 
-
-
-	for group in groups:
-		groupstr = ''
-		for char in group:
-			groupstr += str(char[0])
-		pdb.set_trace()
-		print groupstr + '\r\n'
-
-
-	pdb.set_trace()
+		# Add found group to overall list
+		groups.append(group)
 
 	return groups
-
 
 
 def main():
@@ -277,7 +275,7 @@ def main():
 	#textstr = pytesseract.image_to_string(Image.open('units01.jpg'))
 	#print textstr
 
-	input_doc = './Examples/rationalnums.pdf'
+	input_doc = './Examples/romeojuliet.pdf'
 
 	#with open(input_doc) as f: doc = slate.PDF(f)
 
@@ -292,13 +290,36 @@ def main():
 	chars = recurse_find(page._objs, pdfminer.layout.LTChar)
 	images = recurse_find(page._objs, pdfminer.layout.LTFigure)
 
-	chars = sort_chars(chars)
+	lines = sort_into_lines(chars)
 
-	groups = find_groups(chars)
+	groups = groups_from_lines(lines, distance_lim=20)
 
-	draw_page(chars)
+	for ig, group in enumerate(groups):
+		print '\r\n Group no. ' + str(ig) + ' text:  \r\n'
+		groupstr = ''
+		for char in group:
+			try: 
+				charstr = str(char[0])
+				groupstr += charstr
+			except:
+				pass
+		print groupstr
 
-	pdb.set_trace()
+	#pdb.set_trace()
+
+	plt.figure()
+	colorstr = ['b','r','g','y']
+	colorstr += colorstr + colorstr + colorstr + colorstr + colorstr
+	colorstr += colorstr + colorstr + colorstr + colorstr + colorstr
+	for ig, group in enumerate(groups):
+		for char in group:
+			plt.scatter(char[1],char[2],c=colorstr[ig],lw=0)
+
+	plt.show()
+
+	#draw_page(chars)
+
+	#pdb.set_trace()
 
 
 

@@ -1,5 +1,5 @@
 import renderPdf from './renderPdf';
-import Elm from './App.elm';
+import Elm from './Dev.elm';
 import './index.html';
 
 const mountNode = document.getElementById('main');
