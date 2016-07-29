@@ -28,9 +28,8 @@ renderControl parentIds listLength index ({ questionType, title, questionNumber 
           , onInput (QuestionUpdated questionId << TitleUpdated)
           , value title ]
           [ text title ]
-      , select [ onInput <| questionTypeChanged questionId
-               , value <| questionTypeToString questionType
-               ] (renderQuestionTypes questionId)
+      , select [ onInput <| questionTypeChanged questionId ]
+               (renderQuestionTypes questionId questionType)
       , if isFirstElement
         then text ""
         else R.upButton questionMovedUp
@@ -45,8 +44,8 @@ questionTypeChanged : QuestionId -> String -> Msg
 questionTypeChanged id string =
   QuestionUpdated id <| TypeChanged (stringToQuestionType string)
 
-renderQuestionTypes : QuestionId -> List (Html Msg)
-renderQuestionTypes id =
+renderQuestionTypes : QuestionId -> QuestionType -> List (Html Msg)
+renderQuestionTypes id selectedOption =
   let
     questionTypes =
       [ ShortAnswer
@@ -57,12 +56,16 @@ renderQuestionTypes id =
       ]
   in
     if List.length id > 2
-    then List.map renderQuestionType questionTypes
-    else List.map renderQuestionType <| questionTypes ++ [ SubQuestionContainer [] ]
+    then List.map (renderQuestionType selectedOption) questionTypes
+    else List.map (renderQuestionType selectedOption) <| questionTypes ++ [ SubQuestionContainer [] ]
 
-renderQuestionType : QuestionType -> Html Msg
-renderQuestionType questionType =
-  option [ value <| questionTypeToString questionType ] [ text <| prettyPrint questionType ]
+renderQuestionType : QuestionType -> QuestionType -> Html Msg
+renderQuestionType selectedOption questionType =
+  let
+    optionSelected =
+      questionTypeToString selectedOption == questionTypeToString questionType
+  in
+    option [ value <| questionTypeToString questionType, selected optionSelected ] [ text <| prettyPrint questionType ]
 
 prettyPrint : QuestionType -> String
 prettyPrint questionType =

@@ -26,10 +26,10 @@ https://george-ayris.github.io/teach/
 - Colour questions?
 
 # Bugs/Tech debt
-- Control drop downs reset during re-ordering of container sub questions
 - Max on number of sub questions
 - Properly deal with limit to nesting in sub questions
 - Switch on warn flag in compiler  
+- Add more tests for existing features
 
 # Requirements  
 - Python features currently require (working with Python 2.7):
