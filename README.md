@@ -31,6 +31,7 @@ https://george-ayris.github.io/teach/
 - Properly deal with limit to nesting in sub questions
 - Switch on warn flag in compiler  
 - Add more tests for existing features
+- Extract shared webpack code
 
 # Requirements  
 - Python features currently require (working with Python 2.7):
