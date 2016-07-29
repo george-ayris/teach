@@ -35,14 +35,28 @@ update msg ({questions} as model) =
 
         TypeChanged newType ->
           let
-            addOptionIfMultipleChoice questionType =
-              case questionType of
+            generateCmd =
+              case newType of
                 MultipleChoice _ ->
                   Utils.createCmd <| QuestionUpdated id MultipleChoiceOptionAdded
+
+                SubQuestionContainer _ ->
+                  let
+                    oldQuestion = retrieveQuestion id questions
+                  in
+                    case oldQuestion of
+                      Just q ->
+                        Cmd.batch
+                        [ Utils.createCmd <| QuestionUpdated (id ++ [1]) <| TypeChanged q.questionType
+                        , Utils.createCmd <| SubQuestionAdded id
+                        ]
+
+                      Nothing -> Cmd.none
+
                 _ -> Cmd.none
           in
             ({ model | questions = updateQuestionWithId (updateQuestionType newType) id questions }
-            , addOptionIfMultipleChoice newType)
+            , generateCmd)
 
         MultipleChoiceOptionAdded ->
           ({ model | questions = updateQuestionWithId (addMultipleChoiceOption) id questions }, Cmd.none)
