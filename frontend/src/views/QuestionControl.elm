@@ -89,7 +89,7 @@ renderQuestionSpecificControl id ({ questionType, title } as question) =
     SubQuestionContainer questions ->
       div [ style subQuestionContainer ] <| List.concat
         [ List.indexedMap (renderControl id <| List.length questions) questions
-        , [ button [ onClick <| SubQuestionAdded id ] [ text "Add sub-question" ] ]
+        , [ div [ style endOfSubQuestion ] [ button [ onClick <| SubQuestionAdded id ] [ text "Add sub-question" ]]]
         ]
 
     _ -> text ""
