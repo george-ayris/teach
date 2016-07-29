@@ -9,6 +9,7 @@ type Msg
   | QuestionOrderChanged QuestionOrderingInfo
   | FormTitleUpdated String
   | SubQuestionAdded QuestionId
+  | RenderPdf
 
 type UpdateType
   = TypeChanged QuestionType
