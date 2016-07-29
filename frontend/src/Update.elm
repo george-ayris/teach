@@ -3,55 +3,72 @@ module Update exposing (update)
 import Utils
 import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo, QuestionId)
 import Messages exposing (Msg(..), UpdateType(..), QuestionOrderingInfo)
+import Update.Extra exposing (andThen)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg ({questions} as model) =
   case msg of
     FormTitleUpdated newTitle ->
-      ({ model | title = newTitle }, Cmd.none)
+      { model | title = newTitle } ! []
 
     QuestionAdded ->
-      ({ model
-       | questions = questions ++ [{ questionType = ShortAnswer
-                                    , title = ""
-                                    , questionNumber = (List.length questions) + 1
-                                    }]
-       }
-      , Cmd.none)
+      { model
+      | questions = questions ++ [{ questionType = ShortAnswer
+                                  , title = ""
+                                  , questionNumber = (List.length questions) + 1
+                                  }]
+      } ! []
 
     QuestionRemoved id ->
-      ({ model | questions = removeQuestionWithId id questions }, Cmd.none)
+      { model | questions = removeQuestionWithId id questions } ! []
 
     QuestionOrderChanged { oldQuestionId, questionIdToMoveAfter } ->
-      ({ model | questions = moveQuestion oldQuestionId questionIdToMoveAfter questions }, Cmd.none)
+      { model | questions = moveQuestion oldQuestionId questionIdToMoveAfter questions } ! []
 
     SubQuestionAdded parentId ->
-      ({ model | questions = updateQuestionWithId addSubQuestion parentId questions }, Cmd.none)
+      { model | questions = updateQuestionWithId addSubQuestion parentId questions } ! []
 
     QuestionUpdated id updateType ->
       case updateType of
         TitleUpdated newTitle ->
-          ({ model | questions = updateQuestionWithId (updateQuestionTitle newTitle) id questions }, Cmd.none)
+          { model | questions = updateQuestionWithId (updateQuestionTitle newTitle) id questions } ! []
 
         TypeChanged newType ->
           let
-            addOptionIfMultipleChoice questionType =
-              case questionType of
-                MultipleChoice _ ->
-                  Utils.createCmd <| QuestionUpdated id MultipleChoiceOptionAdded
-                _ -> Cmd.none
+            chainUpdates model =
+              case newType of
+                MultipleChoice { options } ->
+                  if List.length options == 0
+                  then model |> andThen update (QuestionUpdated id MultipleChoiceOptionAdded)
+                  else model
+
+                SubQuestionContainer _ ->
+                  let
+                    oldQuestion = retrieveQuestion id questions
+                  in
+                    case oldQuestion of
+                      Just q ->
+                        model
+                        |> andThen update (QuestionUpdated id <| TitleUpdated "")
+                        |> andThen update (SubQuestionAdded id)
+                        |> andThen update (QuestionUpdated (id ++ [1]) <| TitleUpdated q.title)
+                        |> andThen update (QuestionUpdated (id ++ [1]) <| TypeChanged q.questionType)
+
+                      Nothing -> model
+
+                _ -> model
           in
-            ({ model | questions = updateQuestionWithId (updateQuestionType newType) id questions }
-            , addOptionIfMultipleChoice newType)
+            { model | questions = updateQuestionWithId (updateQuestionType newType) id questions } ! []
+             |> chainUpdates
 
         MultipleChoiceOptionAdded ->
-          ({ model | questions = updateQuestionWithId (addMultipleChoiceOption) id questions }, Cmd.none)
+          { model | questions = updateQuestionWithId (addMultipleChoiceOption) id questions } ! []
 
         MultipleChoiceOptionRemoved optionId ->
-          ({ model | questions = updateQuestionWithId (removeMultipleChoiceOption optionId) id questions }, Cmd.none)
+          { model | questions = updateQuestionWithId (removeMultipleChoiceOption optionId) id questions } ! []
 
         MultipleChoiceOptionUpdated optionId newValue ->
-          ({ model | questions = updateQuestionWithId (updateMultipleChoiceOption optionId newValue) id questions }, Cmd.none)
+          { model | questions = updateQuestionWithId (updateMultipleChoiceOption optionId newValue) id questions } ! []
 
 moveQuestion : QuestionId -> QuestionId -> List Question -> List Question
 moveQuestion oldQuestionId questionIdToMoveAfter questions =

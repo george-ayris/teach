@@ -4,7 +4,7 @@ var webpack = require('webpack');
 module.exports = {
   entry: {
     app: [
-      './frontend/src/index.js'
+      './frontend/src/dev.js'
     ]
   },
 
