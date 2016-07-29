@@ -4,17 +4,18 @@ https://george-ayris.github.io/teach/
 # GA
 - Drag and drop (https://groups.google.com/forum/#!topic/elm-discuss/rGgAQkgOrt0)
 - Nesting and un-nesting existing questions
-- Subquestions (with optional header text)
 - Editable header text at top of worksheet
 - Images in question text
 - Question descriptions
-- Print worksheets
+- Print worksheets to pdf
 - Register/login
 - Save worksheet
 - Tag worksheets/questions
 - Question bank
 - Search and then edit worksheets
 - Diagram labelling
+- Fill in the blank questions (with optional wordbank)
+- Clone question
 
 # LC
 - Get text in correct order inside group

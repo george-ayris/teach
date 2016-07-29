@@ -4,10 +4,15 @@ import Utils
 import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo, QuestionId)
 import Messages exposing (Msg(..), UpdateType(..), QuestionOrderingInfo)
 import Update.Extra exposing (andThen)
+import Ports exposing (..)
+import Json exposing (jsonEncodeModel)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg ({questions} as model) =
   case msg of
+    RenderPdf ->
+      model ! [ renderPdf <| jsonEncodeModel model ]
+
     FormTitleUpdated newTitle ->
       { model | title = newTitle } ! []
 
