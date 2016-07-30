@@ -4,6 +4,7 @@ import pdb
 import subprocess
 import copy
 import time
+import unicodedata 
 
 class char():
 	def __init__(self, **kwargs):
@@ -21,17 +22,10 @@ def sort_into_lines(charsIN, line_spacing=10, ctype='obj'):
 	# first sort the whole list by vertical distance 
 	charsy, candidates = [] ,[]
 	for char in charsIN:	
-		# Do not include whitespace characters
-		if ctype == 'tuple': chary0 = char[2]
-		else:				 chary0 = char.y0
-		try: 
-			charstr = str(char.text)
-			if not str(char.text) == ' ':
-				charsy.append(-chary0)
-				candidates.append(char)
-		except: 
-			charsy.append(-chary0)
-			candidates.append(char)
+		if ctype == 'tuple': chary0, chartext = char[2], char[0]
+		else:				 chary0, chartext = char.y0, char.text
+		charsy.append(-chary0)
+		candidates.append(char)
 
 	inds = np.argsort(charsy)
 	chars = [ candidates[inds[ic]] for ic in range(len(inds)) ]
@@ -67,15 +61,35 @@ def sort_into_lines(charsIN, line_spacing=10, ctype='obj'):
 		lines.append(line)
 		iline += 1
 
+	_lines = copy.copy(lines)
+
+	## Remove any whitespace from beginning and end of lines
+	for line in lines:
+		if ctype=='tuple':
+			while line and unicodedata.normalize('NFKD',line[0][0])\
+						.encode('ascii','ignore') == ' ': line.remove(line[0])
+			while line and unicodedata.normalize('NFKD',line[-1][0])\
+						.encode('ascii','ignore') == ' ': line.remove(line[-1])
+		else:
+			while line and unicodedata.normalize('NFKD',line[0].text)\
+						.encode('ascii','ignore') == ' ': line.remove(line[0])
+			while line and unicodedata.normalize('NFKD',line[-1].text)\
+						.encode('ascii','ignore') == ' ': line.remove(line[-1])	
+		# If this has resulted in an empty line, remove it from list
+		if not line: lines.remove(line)
+
 	return lines		
 
 
 def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 
-	t0 = time.time()
-
 	''' Sorts a list of lines for the whole page into groups of text.
-	Returns a list of groups, each group is ordered for reading '''
+	Returns a list of groups, each group is ordered for reading.
+	lines: list of lines of chars
+	distance_lim: this distance used to determine whether a char is in the group
+	ctype: whether chars are stored as tuples or objects. Tuples are faster. '''
+
+	t0 = time.time() # for timing performance
 
 	groups = [] # list of lists 
 
@@ -115,7 +129,6 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 				candidates += lines[iline]
 				if iline != 0: 			candidates += lines[iline-1]
 				if iline != n_lines-1: 	candidates += lines[iline+1]
-
 				to_search = list( set(ungrouped).intersection(set(candidates)) )
 
 				distances = []
@@ -123,11 +136,9 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 					if ctype=='tuple':   otherx, othery = .5*(other[1]+other[3]), .5*(other[2]+other[4])
 					else: 				otherx, othery = .5*(other.x0+other.x1), .5*(other.y0+other.y1)
 					
-					# measure distance as smallest distance between corners
-					#distance1 = np.sqrt((other[1]-char[1])**2 + (other[3]-char[3])**2)
-					#distance2 = np.sqrt((other[1]-char[1])**2 + (other[3]-char[3])**2)
-
-					distances.append( np.sqrt( (otherx-charx)**2 + (othery-chary)**2 ) )
+					# measure distance as smallest distance between diagonal corners
+					distance = np.sqrt( (otherx-charx)**2 + (othery-chary)**2 )
+					distances.append( distance )
 					if distances[-1] < distance_lim: # found a neighbour
 						group.append(other) # move the candidate into the group
 
@@ -165,11 +176,14 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 		new_groups.append(ordered_group)
 
 	# Now sort all groups by height order (using the first char as reference)
-	#heights = []
-	#for group in new_groups: heights.append(group[0][])
+	heights = []
+	for group in new_groups: 
+		if ctype=='tuple': heights.append(-group[0][2])
+		else:				heights.append(-group.y0)
+	inds = np.argsort(np.array(heights))
+	groups = [new_groups[ii] for ii in inds]
 
 	t1 = time.time()
 	print 'Time to group: ' + str(t1-t0)
-	pdb.set_trace()
 
-	return new_groups
+	return groups

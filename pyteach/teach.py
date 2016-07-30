@@ -63,7 +63,7 @@ def main():
 	colorstr += colorstr + colorstr + colorstr + colorstr + colorstr
 	colorstr += colorstr + colorstr + colorstr + colorstr + colorstr
 	for ig, group in enumerate(groups):
-		cstr = colorstr[int(4*np.random.uniform())]
+		cstr = colorstr[ig]
 		for char in group:
 			plt.scatter(char[1],char[2],c=cstr,lw=0)
 
