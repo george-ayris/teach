@@ -6,6 +6,10 @@ https://george-ayris.github.io/teach/
 - Nesting and un-nesting existing questions
 - Editable header text at top of worksheet
 - Images in question text
+  - Appear in modal
+  - Resize in question
+  - Crop image on upload
+  - Remove current image
 - Question descriptions
 - Print worksheets to pdf
 - Register/login
