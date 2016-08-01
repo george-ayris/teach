@@ -21,6 +21,7 @@ tests =
                                                            , questionNumber = 3
                                                            , questionType = SubQuestionContainer
                                                                               [ { multipleChoiceQuestion | questionNumber = 1 } ]
+                                                           , image = Nothing
                                                            }]}
                 (fst (update (QuestionUpdated [3] <| TypeChanged <| SubQuestionContainer []) modelWithThreeQuestions))
 
@@ -87,13 +88,14 @@ subQuestionContainer : Question
 subQuestionContainer = { questionNumber = 2
                        , questionType = SubQuestionContainer [ shortAnswerQuestion, longAnswerQuestion, multipleChoiceQuestion ]
                        , title = "Ask and ask"
+                       , image = Nothing
                        }
 
 shortAnswerQuestion : Question
-shortAnswerQuestion = { questionNumber = 1, questionType = ShortAnswer, title = "" }
+shortAnswerQuestion = { questionNumber = 1, questionType = ShortAnswer, title = "", image = Nothing }
 
 longAnswerQuestion : Question
-longAnswerQuestion = { questionNumber = 2, questionType = LongAnswer, title = "Write me an essay" }
+longAnswerQuestion = { questionNumber = 2, questionType = LongAnswer, title = "Write me an essay", image = Nothing }
 
 multipleChoiceQuestion : Question
-multipleChoiceQuestion = { questionNumber = 3, questionType = MultipleChoice { options = [{ id = 0, value = "" }], uid = 1 }, title = "Pick me, pick me!" }
+multipleChoiceQuestion = { questionNumber = 3, questionType = MultipleChoice { options = [{ id = 0, value = "" }], uid = 1 }, title = "Pick me, pick me!", image = Nothing }
