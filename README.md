@@ -1,11 +1,15 @@
 https://george-ayris.github.io/teach/
 
 # Todo/Features
-# GA
+## GA
 - Drag and drop (https://groups.google.com/forum/#!topic/elm-discuss/rGgAQkgOrt0)
 - Nesting and un-nesting existing questions
 - Editable header text at top of worksheet
 - Images in question text
+  - Appear in modal
+  - Resize in question
+  - Crop image on upload
+  - Remove current image
 - Question descriptions
 - Print worksheets to pdf
 - Register/login
@@ -17,7 +21,7 @@ https://george-ayris.github.io/teach/
 - Fill in the blank questions (with optional wordbank)
 - Clone question
 
-# LC
+## LC
 - Get text in correct order inside group
 - Get group positions for ordering
 - Decide whether group is a question or not
@@ -32,8 +36,8 @@ https://george-ayris.github.io/teach/
 - Switch on warn flag in compiler  
 - Add more tests for existing features
 - Extract shared webpack code
+- Deal with pop up blocking of pdf render - probably display in a modal
 
 # Requirements  
 - Python features currently require (working with Python 2.7):
-- pytesseract - https://pypi.python.org/pypi/pytesseract/0.1
-- slate - https://pypi.python.org/pypi/slate
+- pdfminer - https://pypi.python.org/pypi/pdfminer

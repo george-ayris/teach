@@ -2,16 +2,22 @@ module Update exposing (update)
 
 import Utils
 import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo, QuestionId)
-import Messages exposing (Msg(..), UpdateType(..), QuestionOrderingInfo)
+import Messages exposing (Msg(..), UpdateType(..), QuestionOrderingInfo, ImageUploadedResult)
 import Update.Extra exposing (andThen)
 import Ports exposing (..)
-import Json exposing (jsonEncodeModel)
+import Json
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg ({questions} as model) =
   case msg of
     RenderPdf ->
-      model ! [ renderPdf <| jsonEncodeModel model ]
+      model ! [ renderPdf <| Json.encodeModel model ]
+
+    ImageUploaded info ->
+      model ! [ imageUploaded info ]
+
+    ImageUploadResultReceived ({questionId} as info) ->
+      { model | questions = updateQuestionWithId (addImage info) questionId questions } ! []
 
     FormTitleUpdated newTitle ->
       { model | title = newTitle } ! []
@@ -21,6 +27,7 @@ update msg ({questions} as model) =
       | questions = questions ++ [{ questionType = ShortAnswer
                                   , title = ""
                                   , questionNumber = (List.length questions) + 1
+                                  , image = Nothing
                                   }]
       } ! []
 
@@ -164,6 +171,9 @@ mapOntoQuestionsInHierachy processQuestions questionId questions =
 
     _ -> questions
 
+addImage : ImageUploadedResult -> Question -> Question
+addImage { name, result } question =
+  { question | image = Just { data = result, name = name } }
 
 addSubQuestion : Question -> Question
 addSubQuestion =
@@ -172,6 +182,7 @@ addSubQuestion =
       subQuestions ++ [{ questionType = ShortAnswer
                        , title = ""
                        , questionNumber = (List.length subQuestions) + 1
+                       , image = Nothing
                        }]
   in
    mapOntoSubQuestions addSubQuestion'

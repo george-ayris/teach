@@ -38,6 +38,16 @@ questionStyle =
   , paddingTop standardPadding
   ]
 
+questionImage =
+  [ width (px 300)
+  , height "auto"
+  , paddingTop standardPadding
+  , paddingBottom standardPadding
+  , marginLeft auto
+  , marginRight auto
+  , display block
+  ]
+
 subQuestionContainer =
   [ paddingLeft standardPadding ]
 

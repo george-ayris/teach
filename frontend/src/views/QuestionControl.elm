@@ -7,19 +7,26 @@ import Models exposing (..)
 import Messages exposing (..)
 import Views.Styling exposing (..)
 import Views.Resources as R
+import Json.Decode as Json
 
 renderControl : QuestionId -> Int -> Int -> Question -> Html Msg
-renderControl parentIds listLength index ({ questionType, title, questionNumber } as question) =
+renderControl parentIds listLength index ({ questionType, title, questionNumber, image } as question) =
   let
-   isFirstElement = index == 0
-   isLastElement = index == listLength - 1
-   questionId = parentIds ++ [ questionNumber ]
-   questionMovedUp = QuestionOrderChanged { oldQuestionId = questionId
+    questionId = parentIds ++ [ questionNumber ]
+    isFirstElement = index == 0
+    questionMovedUp = QuestionOrderChanged { oldQuestionId = questionId
                                           , questionIdToMoveAfter = parentIds ++ [ questionNumber - 2 ]
                                           }
-   questionMovedDown = QuestionOrderChanged { oldQuestionId = questionId
-                                            , questionIdToMoveAfter = parentIds ++ [ questionNumber + 1 ]
-                                            }
+    upButton = if isFirstElement
+            then text ""
+              else R.upButton questionMovedUp
+    isLastElement = index == listLength - 1
+    questionMovedDown = QuestionOrderChanged { oldQuestionId = questionId
+                                             , questionIdToMoveAfter = parentIds ++ [ questionNumber + 1 ]
+                                             }
+    downButton = if isLastElement
+                 then text ""
+                 else R.downButton questionMovedDown
   in
     div []
       [ input
@@ -30,15 +37,33 @@ renderControl parentIds listLength index ({ questionType, title, questionNumber 
           [ text title ]
       , select [ onInput <| questionTypeChanged questionId ]
                (renderQuestionTypes questionId questionType)
-      , if isFirstElement
-        then text ""
-        else R.upButton questionMovedUp
-      , if isLastElement
-        then text ""
-        else R.downButton questionMovedDown
+      , upButton
+      , downButton
       , R.removeButton <| QuestionRemoved questionId
+      , addImageButton questionId image
       , renderQuestionSpecificControl questionId question
       ]
+
+addImageButton : QuestionId -> Maybe Image -> Html Msg
+addImageButton questionId image =
+  -- Launch dialog here with input/drag and drop/paste area
+  let
+    elementId = "imageUpload" ++ (toString questionId)
+  in
+    case image of
+      Just { name } ->
+        div [] [ text <| "Current image: " ++ name ]
+
+      Nothing ->
+        div []
+          [ input
+            [ type' "file"
+            , accept "image/*"
+            , id elementId
+            , on "change" (Json.succeed <| ImageUploaded { questionId = questionId, elementId = elementId })
+            ]
+            []
+          ]
 
 questionTypeChanged : QuestionId -> String -> Msg
 questionTypeChanged id string =

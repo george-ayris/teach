@@ -10,13 +10,17 @@ import Models exposing (..)
 import Messages exposing (..)
 
 renderQuestionOutput : QuestionId -> Question -> Html Msg
-renderQuestionOutput parentIds ({ questionType, title, questionNumber } as question) =
+renderQuestionOutput parentIds ({ questionType, title, questionNumber, image } as question) =
     let
       title' = if String.isEmpty title then R.questionPlaceholder else title
       questionId = parentIds ++ [ questionNumber ]
+      renderImage = case image of
+        Just { data } -> img [ src data, style questionImage ] []
+        Nothing -> text ""
     in
       div []
         [ div [ style questionStyle ] [ text <| (toStringQuestionNumber questionId) ++ ". " ++ title' ]
+        , renderImage
         , div [] [ questionSpecificContent questionId question ]
         ]
 
