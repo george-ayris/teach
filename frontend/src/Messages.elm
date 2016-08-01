@@ -10,6 +10,8 @@ type Msg
   | FormTitleUpdated String
   | SubQuestionAdded QuestionId
   | RenderPdf
+  | ImageUploaded ImageUploadedInfo
+  | ImageUploadResultReceived ImageUploadedResult
 
 type UpdateType
   = TypeChanged QuestionType
@@ -21,4 +23,17 @@ type UpdateType
 type alias QuestionOrderingInfo =
   { oldQuestionId : QuestionId
   , questionIdToMoveAfter : QuestionId
+  }
+
+type alias ElementId = String
+
+type alias ImageUploadedInfo =
+  { questionId : QuestionId
+  , elementId : String
+  }
+
+type alias ImageUploadedResult =
+  { questionId : QuestionId
+  , result : String
+  , name : String
   }

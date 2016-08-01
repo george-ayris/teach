@@ -16,6 +16,7 @@
         "elm-lang/html": "1.0.0 <= v < 2.0.0",
         "jinjor/elm-time-travel": "1.0.16 <= v < 2.0.0",
         "jystic/elm-font-awesome": "2.0.0 <= v < 3.0.0",
+        "krisajenkins/elm-dialog": "3.0.2 <= v < 4.0.0",
         "seanhess/elm-style": "1.0.1 <= v < 2.0.0"
     },
     "elm-version": "0.17.0 <= v < 0.18.0"

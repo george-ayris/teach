@@ -9,6 +9,12 @@ type alias Question =
   { questionNumber : Int
   , questionType : QuestionType
   , title : String
+  , image : Maybe Image
+  }
+
+type alias Image =
+  { data : String
+  , name : String
   }
 
 type alias QuestionId = List Int
