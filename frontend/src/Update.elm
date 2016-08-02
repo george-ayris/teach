@@ -13,11 +13,18 @@ update msg ({questions} as model) =
     RenderPdf ->
       model ! [ renderPdf <| Json.encodeModel model ]
 
+    ShowImageUploadDialog questionId ->
+      { model | dialogInfo = Just questionId } ! []
+
+    CloseImageUploadDialog ->
+      { model | dialogInfo = Nothing } ! []
+
     ImageUploaded info ->
       model ! [ imageUploaded info ]
 
     ImageUploadResultReceived ({questionId} as info) ->
       { model | questions = updateQuestionWithId (addImage info) questionId questions } ! []
+      |> andThen update CloseImageUploadDialog
 
     FormTitleUpdated newTitle ->
       { model | title = newTitle } ! []

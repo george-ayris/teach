@@ -10,6 +10,8 @@ type Msg
   | FormTitleUpdated String
   | SubQuestionAdded QuestionId
   | RenderPdf
+  | ShowImageUploadDialog QuestionId
+  | CloseImageUploadDialog
   | ImageUploaded ImageUploadedInfo
   | ImageUploadResultReceived ImageUploadedResult
 

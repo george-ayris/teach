@@ -15,4 +15,4 @@ main =
 
 init : (Model, Cmd Msg)
 init =
-  (Model "My Worksheet" [], Cmd.none)
+  (Model "My Worksheet" [] Nothing, Cmd.none)

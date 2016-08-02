@@ -3,6 +3,7 @@ module Models exposing (..)
 type alias Model =
   { title : String
   , questions : List Question
+  , dialogInfo : Maybe QuestionId
   }
 
 type alias Question =
