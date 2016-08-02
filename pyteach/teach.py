@@ -3,6 +3,13 @@ import pdb
 import subprocess
 import copy
 import matplotlib.pyplot as plt
+import os
+
+import sys
+sys.path.insert(0, os.getenv("HOME") + '/teach/Examples/') 
+sys.path.insert(0, os.getenv("HOME") + '/phd-code/utils/')
+
+import utilities as utils
 
 #import slate
 import pdfminer
@@ -12,15 +19,22 @@ from PIL import Image
 import page_analysis as pa
 import pdf_scanner as ps
 
-
-
+import optparse
 
 def main():
 
+	parser = optparse.OptionParser()
+	options, args = parser.parse_args()
+
+	try:	filename = str(args[0])
+	except: raise "Input must be string!"
+
+	base_dir = os.getenv("HOME")
+	input_doc = base_dir + '/teach/Examples/' + filename
+
+
 	#textstr = pytesseract.image_to_string(Image.open('units01.jpg'))
 	#print textstr
-
-	input_doc = './Examples/romeojuliet.pdf'
 
 	#with open(input_doc) as f: doc = slate.PDF(f)
 
@@ -58,8 +72,10 @@ def main():
 
 	#pdb.set_trace()
 
+	#utils.mpl2tex()
+
 	plt.figure()
-	colorstr = ['b','r','g','y']
+	colorstr = ['b','r','g','y','m','k','c']
 	colorstr += colorstr + colorstr + colorstr + colorstr + colorstr
 	colorstr += colorstr + colorstr + colorstr + colorstr + colorstr
 	for ig, group in enumerate(groups):
@@ -81,6 +97,8 @@ def main():
 
 
 if __name__ == "__main__":
+	
+
 	main()
 
 

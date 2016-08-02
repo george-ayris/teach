@@ -33,7 +33,7 @@ def sort_into_lines(charsIN, line_spacing=10, ctype='obj'):
 
 	# next sort into lines
 	lines, iline = [], 0 # lines entries have an extry term to say what line they're on
-	while chars:
+	while chars: # Every character is sorted into a line
 		others = copy.copy(chars)
 		char = chars[0]
 		chars.remove(char)		
@@ -105,6 +105,7 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 	while ungrouped: # while there are still ungrouped characters
 
 		group = [] # initialize new group
+		dlim = distance_lim # distance lim depends on the group
 
 		# start with a non-grouped character
 		char0 = ungrouped[0]
@@ -115,6 +116,12 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 
 		# While there are members of the group who have not been examined
 		while to_examine:
+
+			# Have a group dependent dlim parameter
+			#diags = [ np.sqrt((char[3]-char[1])**2 +(char[4]-char[2])**2) for char in group ]
+			#dlim_group = np.mean( np.array(diags + [distance_lim]) )
+			#if dlim_group > distance_lim:	dlim = dlim_group
+			#else: 							qdlim = distance_lim
 
 			# For each unexamined member of the group, find neighbours and add to group
 			for char in to_examine:
@@ -139,7 +146,7 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 					# measure distance as smallest distance between diagonal corners
 					distance = np.sqrt( (otherx-charx)**2 + (othery-chary)**2 )
 					distances.append( distance )
-					if distances[-1] < distance_lim: # found a neighbour
+					if distances[-1] < dlim: # found a neighbour
 						group.append(other) # move the candidate into the group
 
 
