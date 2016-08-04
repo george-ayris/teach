@@ -29,4 +29,6 @@ addImageButton msg =
 
 fontIconContainer : Msg -> Html Msg -> Html Msg
 fontIconContainer msg icon =
-  span [ style svgContainer, onClick <| msg ] [ icon ]
+  button [ style svgContainer
+         , onClick <| msg ]
+         [ icon ]

@@ -5,11 +5,15 @@ import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo, Q
 import Messages exposing (Msg(..), UpdateType(..), QuestionOrderingInfo, ImageUploadedResult)
 import Update.Extra exposing (andThen)
 import Ports exposing (..)
+import Material
 import Json
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg ({questions} as model) =
   case msg of
+    Mdl msg' ->
+      Material.update msg' model
+
     RenderPdf ->
       model ! [ renderPdf <| Json.encodeModel model ]
 

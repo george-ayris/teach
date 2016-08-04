@@ -3,6 +3,7 @@ import Views exposing (view)
 import Update exposing (update)
 import Models exposing (Model)
 import Messages exposing (Msg)
+import Material
 import Ports exposing (imageUploadedResultSubscription)
 
 main =
@@ -15,4 +16,4 @@ main =
 
 init : (Model, Cmd Msg)
 init =
-  (Model "My Worksheet" [] Nothing, Cmd.none)
+  (Model "My Worksheet" [] Nothing Material.model, Cmd.none)

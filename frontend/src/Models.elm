@@ -1,9 +1,12 @@
 module Models exposing (..)
 
+import Material
+
 type alias Model =
   { title : String
   , questions : List Question
   , dialogInfo : Maybe QuestionId
+  , mdl : Material.Model
   }
 
 type alias Question =
