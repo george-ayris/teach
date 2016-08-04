@@ -37,33 +37,12 @@ renderControl parentIds listLength index ({ questionType, title, questionNumber,
           [ text title ]
       , select [ onInput <| questionTypeChanged questionId ]
                (renderQuestionTypes questionId questionType)
+      , R.addImageButton <| ShowImageUploadDialog questionId
       , upButton
       , downButton
       , R.removeButton <| QuestionRemoved questionId
-      , addImageButton questionId image
       , renderQuestionSpecificControl questionId question
       ]
-
-addImageButton : QuestionId -> Maybe Image -> Html Msg
-addImageButton questionId image =
-  -- Launch dialog here with input/drag and drop/paste area
-  let
-    elementId = "imageUpload" ++ (toString questionId)
-  in
-    case image of
-      Just { name } ->
-        div [] [ text <| "Current image: " ++ name ]
-
-      Nothing ->
-        div []
-          [ input
-            [ type' "file"
-            , accept "image/*"
-            , id elementId
-            , on "change" (Json.succeed <| ImageUploaded { questionId = questionId, elementId = elementId })
-            ]
-            []
-          ]
 
 questionTypeChanged : QuestionId -> String -> Msg
 questionTypeChanged id string =

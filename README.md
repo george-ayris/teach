@@ -20,6 +20,7 @@ https://george-ayris.github.io/teach/
 - Diagram labelling
 - Fill in the blank questions (with optional wordbank)
 - Clone question
+- Record question answers?
 
 ## LC
 - Get text in correct order inside group
@@ -37,6 +38,7 @@ https://george-ayris.github.io/teach/
 - Add more tests for existing features
 - Extract shared webpack code
 - Deal with pop up blocking of pdf render - probably display in a modal
+- Use sass for the css
 
 # Requirements  
 - Python features currently require (working with Python 2.7):

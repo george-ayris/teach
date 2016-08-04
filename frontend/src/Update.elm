@@ -5,19 +5,30 @@ import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo, Q
 import Messages exposing (Msg(..), UpdateType(..), QuestionOrderingInfo, ImageUploadedResult)
 import Update.Extra exposing (andThen)
 import Ports exposing (..)
+import Material
 import Json
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg ({questions} as model) =
   case msg of
+    Mdl msg' ->
+      Material.update msg' model
+
     RenderPdf ->
       model ! [ renderPdf <| Json.encodeModel model ]
+
+    ShowImageUploadDialog questionId ->
+      { model | dialogInfo = Just questionId } ! []
+
+    CloseImageUploadDialog ->
+      { model | dialogInfo = Nothing } ! []
 
     ImageUploaded info ->
       model ! [ imageUploaded info ]
 
     ImageUploadResultReceived ({questionId} as info) ->
       { model | questions = updateQuestionWithId (addImage info) questionId questions } ! []
+      |> andThen update CloseImageUploadDialog
 
     FormTitleUpdated newTitle ->
       { model | title = newTitle } ! []

@@ -1,6 +1,7 @@
 module Messages exposing (..)
 
 import Models exposing (..)
+import Material
 
 type Msg
   = QuestionAdded
@@ -10,8 +11,11 @@ type Msg
   | FormTitleUpdated String
   | SubQuestionAdded QuestionId
   | RenderPdf
+  | ShowImageUploadDialog QuestionId
+  | CloseImageUploadDialog
   | ImageUploaded ImageUploadedInfo
   | ImageUploadResultReceived ImageUploadedResult
+  | Mdl (Material.Msg Msg)
 
 type UpdateType
   = TypeChanged QuestionType

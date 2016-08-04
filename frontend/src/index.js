@@ -1,6 +1,7 @@
 import Elm from './App.elm';
 import './index.html';
 import registerPorts from './js/ports'
+import './sass/main.scss'
 
 const mountNode = document.getElementById('main');
 

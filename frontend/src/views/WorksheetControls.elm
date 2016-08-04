@@ -8,6 +8,11 @@ import Models exposing (..)
 import Messages exposing (..)
 import Views.Styling exposing (..)
 import Views.QuestionControl exposing (renderControl)
+import Material
+import Material.Button as Button
+
+type alias Mdl =
+  Material.Model
 
 renderWorksheetControls : Model -> Html Msg
 renderWorksheetControls model =
@@ -19,7 +24,13 @@ renderWorksheetControls model =
          ] [ text model.title ]
     , div []
         [ div [] (List.indexedMap (renderControl [] <| List.length model.questions) model.questions)
-        , button [ onClick QuestionAdded ] [ text "Add question" ]
+        , Button.render Mdl [0] model.mdl
+            [ Button.raised
+            , Button.ripple
+            , Button.onClick QuestionAdded
+            , Button.colored
+            ]
+            [ text "Add question" ]
         ]
     ]
 
