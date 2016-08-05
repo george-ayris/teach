@@ -105,7 +105,6 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 	while ungrouped: # while there are still ungrouped characters
 
 		group = [] # initialize new group
-		dlim = distance_lim # distance lim depends on the group
 
 		# start with a non-grouped character
 		char0 = ungrouped[0]
@@ -116,12 +115,6 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 
 		# While there are members of the group who have not been examined
 		while to_examine:
-
-			# Have a group dependent dlim parameter
-			#diags = [ np.sqrt((char[3]-char[1])**2 +(char[4]-char[2])**2) for char in group ]
-			#dlim_group = np.mean( np.array(diags + [distance_lim]) )
-			#if dlim_group > distance_lim:	dlim = dlim_group
-			#else: 							qdlim = distance_lim
 
 			# For each unexamined member of the group, find neighbours and add to group
 			for char in to_examine:
@@ -143,10 +136,21 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 					if ctype=='tuple':   otherx, othery = .5*(other[1]+other[3]), .5*(other[2]+other[4])
 					else: 				otherx, othery = .5*(other.x0+other.x1), .5*(other.y0+other.y1)
 					
+					# Reciprical distance - distance is the minimum distance of both characters
+					if ctype=='tuple': 
+						dlim1 = (char[3]-char[1])
+						dlim2 = (other[3]-other[1])
+					else:
+						dlim1 = (char.x1-char.x0)
+						dlim2 = (other.x1-other.x0)
+					pdb.set_trace()
+					dlim = max(min(dlim1,dlim2),20)
+					print dlim
+
 					# measure distance as smallest distance between diagonal corners
 					distance = np.sqrt( (otherx-charx)**2 + (othery-chary)**2 )
 					distances.append( distance )
-					if distances[-1] < dlim: # found a neighbour
+					if distance < dlim: # found a neighbour
 						group.append(other) # move the candidate into the group
 
 
@@ -163,8 +167,6 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 
 		# Add found group to overall list
 		groups.append(group)
-
-
 
 	# Now sort each of the group's text into order
 	new_groups = []
@@ -185,6 +187,7 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 	# Now sort all groups by height order (using the first char as reference)
 	heights = []
 	for group in new_groups: 
+		#pdb.set_trace()
 		if ctype=='tuple': heights.append(-group[0][2])
 		else:				heights.append(-group.y0)
 	inds = np.argsort(np.array(heights))
