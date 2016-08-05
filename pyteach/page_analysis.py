@@ -138,13 +138,12 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 					
 					# Reciprical distance - distance is the minimum distance of both characters
 					if ctype=='tuple': 
-						dlim1 = (char[3]-char[1])
-						dlim2 = (other[3]-other[1])
+						dlim1 = ((char[3]-char[1])**2 + (char[4]-char[2])**2)**0.5
+						dlim2 = ((other[3]-other[1])**2 + (other[4]-other[2])**2)**0.5
 					else:
-						dlim1 = (char.x1-char.x0)
-						dlim2 = (other.x1-other.x0)
-					pdb.set_trace()
-					dlim = max(min(dlim1,dlim2),20)
+						dlim1 = ((char.x1-char.x0)**2 + (char.y1-char.y2)**2)**0.5
+						dlim2 = ((other.x1-other.x0)**2 + (other.y1-other.y2)**2)**0.5
+					dlim = max(min(dlim1,dlim2),5)
 					print dlim
 
 					# measure distance as smallest distance between diagonal corners
