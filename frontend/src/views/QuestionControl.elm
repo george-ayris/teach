@@ -48,8 +48,8 @@ renderControl parentIds mdl listLength index ({ questionType, title, questionNum
         []
         [ Options.div
             [ Typo.right ]
-            [ R.addImageButton questionId mdl <| ShowImageUploadDialog questionId
-            , upButton
+            [ --R.addImageButton questionId mdl <| ShowImageUploadDialog questionId
+             upButton
             , downButton
             , R.removeButton questionId mdl <| QuestionRemoved questionId
             ]

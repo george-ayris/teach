@@ -4,13 +4,14 @@ import ElmTest exposing (..)
 import Update exposing (update)
 import Models exposing (..)
 import Messages exposing (..)
+import Material
 
 tests : Test
 tests =
     suite "Update tests"
         [ test "QuestionAdded"
             <| assertEqual
-                ({ title = "", questions = [ shortAnswerQuestion ] }, Cmd.none)
+                ({ emptyModel | questions = [ shortAnswerQuestion ] }, Cmd.none)
                 (update QuestionAdded emptyModel)
 
         , test "QuestionTypeChanged - when something is converted to a SubQuestionContainer then a question of the original type is added"
@@ -73,16 +74,16 @@ tests =
         ]
 
 emptyModel : Model
-emptyModel = { title = "", questions = [] }
+emptyModel = { title = "", questions = [], mdl = Material.model }
 
 modelWithTwoQuestions : Model
-modelWithTwoQuestions = { title = "", questions = [ shortAnswerQuestion, longAnswerQuestion ] }
+modelWithTwoQuestions = { emptyModel | questions = [ shortAnswerQuestion, longAnswerQuestion ] }
 
 modelWithThreeQuestions : Model
-modelWithThreeQuestions = { title = "", questions = [ shortAnswerQuestion, longAnswerQuestion, multipleChoiceQuestion ] }
+modelWithThreeQuestions = { emptyModel | questions = [ shortAnswerQuestion, longAnswerQuestion, multipleChoiceQuestion ] }
 
 modelWithSubQuestion : Model
-modelWithSubQuestion = { title = "", questions = [ shortAnswerQuestion, subQuestionContainer, multipleChoiceQuestion ] }
+modelWithSubQuestion = { emptyModel | questions = [ shortAnswerQuestion, subQuestionContainer, multipleChoiceQuestion ] }
 
 subQuestionContainer : Question
 subQuestionContainer = { questionNumber = 2
