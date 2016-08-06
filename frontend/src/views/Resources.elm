@@ -4,31 +4,40 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Color
-import FontAwesome
 import Messages exposing (..)
+import Models exposing (..)
 import Views.Styling exposing (..)
+import Material
+import Material.Button as Button
+import Material.Icon as Icon
+
+type alias Mdl =
+  Material.Model
 
 questionPlaceholder = "What do you want to ask?"
 optionPlaceholder = "Option X"
 
-removeButton : Msg -> Html Msg
-removeButton msg =
-  fontIconContainer msg <| FontAwesome.close Color.red 18
+removeButton : QuestionId -> Mdl -> Msg -> Html Msg
+removeButton id mdl msg =
+  iconButton (id ++ [0]) mdl msg "close"
 
-upButton : Msg -> Html Msg
-upButton msg =
-  fontIconContainer msg <| FontAwesome.arrow_up Color.black 18
+upButton : QuestionId -> Mdl -> Msg -> Html Msg
+upButton id mdl msg =
+  iconButton (id ++ [1]) mdl msg "arrow_upward"
 
-downButton : Msg -> Html Msg
-downButton msg =
-  fontIconContainer msg <| FontAwesome.arrow_down Color.black 18
+downButton : QuestionId -> Mdl -> Msg -> Html Msg
+downButton id mdl msg =
+  iconButton (id ++ [2]) mdl msg "arrow_downward"
 
-addImageButton : Msg -> Html Msg
-addImageButton msg =
-  fontIconContainer msg <| FontAwesome.picture_o Color.black 18
+addImageButton : QuestionId -> Mdl -> Msg -> Html Msg
+addImageButton id mdl msg =
+  iconButton (id ++ [3]) mdl msg "insert_photo"
 
-fontIconContainer : Msg -> Html Msg -> Html Msg
-fontIconContainer msg icon =
-  button [ style svgContainer
-         , onClick <| msg ]
-         [ icon ]
+iconButton : QuestionId -> Mdl -> Msg -> String -> Html Msg
+iconButton id mdl msg icon =
+  Button.render Mdl id mdl
+    [ Button.icon
+    , Button.ripple
+    , Button.onClick msg
+    ]
+    [ Icon.i icon ]
