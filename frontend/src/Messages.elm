@@ -11,8 +11,6 @@ type Msg
   | FormTitleUpdated String
   | SubQuestionAdded QuestionId
   | RenderPdf
-  | ShowImageUploadDialog QuestionId
-  | CloseImageUploadDialog
   | ImageUploaded ImageUploadedInfo
   | ImageUploadResultReceived ImageUploadedResult
   | Mdl (Material.Msg Msg)

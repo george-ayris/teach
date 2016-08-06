@@ -15,7 +15,7 @@ class char():
 		self.y1 = kwargs.setdefault('y1', 0.)
 		self.line_no = kwargs.setdefault('line_no', 0)
 
-def sort_into_lines(charsIN, line_spacing=10, ctype='obj'):
+def sort_into_lines(charsIN, line_spacing=10, ctype='obj', bAddEntry=True):
 	''' sort as if you were reading from top left to bottom right.
 	Returns a list of lines, each line is sorted from left to right '''
 
@@ -37,16 +37,18 @@ def sort_into_lines(charsIN, line_spacing=10, ctype='obj'):
 		others = copy.copy(chars)
 		char = chars[0]
 		chars.remove(char)		
-		if ctype=='tuple': 	char += (iline,)
-		else: 				char.line_no = iline
+		if bAddEntry:
+			if ctype=='tuple': 	char += (iline,)
+			else: 				char.line_no = iline
 		line = [char]
 		for io, other in enumerate(others[1:]): 
 			if ctype == 'tuple': othery0, chary0 = other[2], char[2]
 			else:				 othery0, chary0 = other.y0, char.y0
 			if abs(othery0 - chary0) < line_spacing:
 				chars.remove(other)
-				if ctype=='tuple': 	other += (iline,)
-				else: 				other.line_no = iline			
+				if bAddEntry:
+					if ctype=='tuple': 	other += (iline,)
+					else: 				other.line_no = iline			
 				line.append(other)
 
 		# also sort each line by x distance
@@ -81,12 +83,11 @@ def sort_into_lines(charsIN, line_spacing=10, ctype='obj'):
 	return lines		
 
 
-def groups_from_lines(lines, distance_lim=20, ctype='obj'):
+def groups_from_lines(lines, ctype='obj'):
 
 	''' Sorts a list of lines for the whole page into groups of text.
 	Returns a list of groups, each group is ordered for reading.
 	lines: list of lines of chars
-	distance_lim: this distance used to determine whether a char is in the group
 	ctype: whether chars are stored as tuples or objects. Tuples are faster. '''
 
 	t0 = time.time() # for timing performance
@@ -105,7 +106,6 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 	while ungrouped: # while there are still ungrouped characters
 
 		group = [] # initialize new group
-		dlim = distance_lim # distance lim depends on the group
 
 		# start with a non-grouped character
 		char0 = ungrouped[0]
@@ -116,12 +116,6 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 
 		# While there are members of the group who have not been examined
 		while to_examine:
-
-			# Have a group dependent dlim parameter
-			#diags = [ np.sqrt((char[3]-char[1])**2 +(char[4]-char[2])**2) for char in group ]
-			#dlim_group = np.mean( np.array(diags + [distance_lim]) )
-			#if dlim_group > distance_lim:	dlim = dlim_group
-			#else: 							qdlim = distance_lim
 
 			# For each unexamined member of the group, find neighbours and add to group
 			for char in to_examine:
@@ -143,10 +137,19 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 					if ctype=='tuple':   otherx, othery = .5*(other[1]+other[3]), .5*(other[2]+other[4])
 					else: 				otherx, othery = .5*(other.x0+other.x1), .5*(other.y0+other.y1)
 					
+					# Reciprical distance - distance is the minimum distance of both characters
+					if ctype=='tuple': 
+						dlim1 = ((char[3]-char[1])**2 + (char[4]-char[2])**2)**0.5
+						dlim2 = ((other[3]-other[1])**2 + (other[4]-other[2])**2)**0.5
+					else:
+						dlim1 = ((char.x1-char.x0)**2 + (char.y1-char.y2)**2)**0.5
+						dlim2 = ((other.x1-other.x0)**2 + (other.y1-other.y2)**2)**0.5
+					dlim = max(min(dlim1,dlim2),5)
+
 					# measure distance as smallest distance between diagonal corners
 					distance = np.sqrt( (otherx-charx)**2 + (othery-chary)**2 )
 					distances.append( distance )
-					if distances[-1] < dlim: # found a neighbour
+					if distance < dlim: # found a neighbour
 						group.append(other) # move the candidate into the group
 
 
@@ -164,12 +167,10 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 		# Add found group to overall list
 		groups.append(group)
 
-
-
 	# Now sort each of the group's text into order
 	new_groups = []
 	for group in groups:
-		glines = sort_into_lines(group, ctype=ctype)
+		glines = sort_into_lines(group, ctype=ctype, bAddEntry=False)
 		# now sort lines by height
 		heights = []
 		for line in glines:
@@ -182,9 +183,11 @@ def groups_from_lines(lines, distance_lim=20, ctype='obj'):
 		for gline in sglines: ordered_group += gline
 		new_groups.append(ordered_group)
 
+
 	# Now sort all groups by height order (using the first char as reference)
 	heights = []
 	for group in new_groups: 
+		#pdb.set_trace()
 		if ctype=='tuple': heights.append(-group[0][2])
 		else:				heights.append(-group.y0)
 	inds = np.argsort(np.array(heights))

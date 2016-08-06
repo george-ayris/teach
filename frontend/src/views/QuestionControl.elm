@@ -8,9 +8,21 @@ import Messages exposing (..)
 import Views.Styling exposing (..)
 import Views.Resources as R
 import Json.Decode as Json
+import Material.Card as Card
+import Material.Color as Color
+import Material.Elevation as Elevation
+import Material.List as MList
+import Material.Options as Options exposing (css)
+import Material
+import Material.Textfield as Textfield
+import Material.Typography as Typo
+import Material.Button as Button
 
-renderControl : QuestionId -> Int -> Int -> Question -> Html Msg
-renderControl parentIds listLength index ({ questionType, title, questionNumber, image } as question) =
+type alias Mdl =
+  Material.Model
+
+renderControl : QuestionId -> Mdl -> Int -> Int -> Question -> Html Msg
+renderControl parentIds mdl listLength index ({ questionType, title, questionNumber, image} as question) =
   let
     questionId = parentIds ++ [ questionNumber ]
     isFirstElement = index == 0
@@ -19,29 +31,41 @@ renderControl parentIds listLength index ({ questionType, title, questionNumber,
                                           }
     upButton = if isFirstElement
             then text ""
-              else R.upButton questionMovedUp
+              else R.upButton questionId mdl questionMovedUp
     isLastElement = index == listLength - 1
     questionMovedDown = QuestionOrderChanged { oldQuestionId = questionId
                                              , questionIdToMoveAfter = parentIds ++ [ questionNumber + 1 ]
                                              }
     downButton = if isLastElement
                  then text ""
-                 else R.downButton questionMovedDown
+                 else R.downButton questionId mdl questionMovedDown
   in
-    div []
-      [ input
-          [ type' "text"
-          , placeholder R.questionPlaceholder
-          , onInput (QuestionUpdated questionId << TitleUpdated)
-          , value title ]
-          [ text title ]
-      , select [ onInput <| questionTypeChanged questionId ]
-               (renderQuestionTypes questionId questionType)
-      , R.addImageButton <| ShowImageUploadDialog questionId
-      , upButton
-      , downButton
-      , R.removeButton <| QuestionRemoved questionId
-      , renderQuestionSpecificControl questionId question
+    Card.view
+      [ Elevation.e4
+      , css "width" "100%"
+      ]
+      [ Card.text
+        []
+        [ Options.div
+            [ Typo.right ]
+            [ --R.addImageButton questionId mdl <| ShowImageUploadDialog questionId
+             upButton
+            , downButton
+            , R.removeButton questionId mdl <| QuestionRemoved questionId
+            ]
+        , div []
+            [ Textfield.render Mdl questionId mdl
+              [ Textfield.onInput <| QuestionUpdated questionId << TitleUpdated
+              , Textfield.label R.questionPlaceholder
+              , Textfield.textarea
+              , css "width" "100%"
+              ]
+            ]
+        , select
+            [ onInput <| questionTypeChanged questionId ]
+            (renderQuestionTypes questionId questionType)
+        , renderQuestionSpecificControl questionId mdl question
+        ]
       ]
 
 questionTypeChanged : QuestionId -> String -> Msg
@@ -81,25 +105,39 @@ prettyPrint questionType =
     MultipleChoice _ -> "Multiple choice"
     SubQuestionContainer _ -> "Or add a sub-question"
 
-renderQuestionSpecificControl : QuestionId -> Question -> Html Msg
-renderQuestionSpecificControl id ({ questionType, title } as question) =
+renderQuestionSpecificControl : QuestionId -> Mdl -> Question -> Html Msg
+renderQuestionSpecificControl id mdl ({ questionType, title } as question) =
   case questionType of
     MultipleChoice { options } ->
       div [] <| List.concat
-        [ List.map (renderOption id) options
+        [ List.map (renderOption id mdl) options
         , [ div [] [ button [ onClick <| QuestionUpdated id MultipleChoiceOptionAdded ] [ text "Add option" ]]]
         ]
 
     SubQuestionContainer questions ->
-      div [ style subQuestionContainer ] <| List.concat
-        [ List.indexedMap (renderControl id <| List.length questions) questions
-        , [ div [ style endOfSubQuestion ] [ button [ onClick <| SubQuestionAdded id ] [ text "Add sub-question" ]]]
-        ]
+      let
+        controls = List.indexedMap (renderControl id mdl <| List.length questions) questions
+      in
+        div [ style subQuestionContainer ]
+          [ MList.ul [] <| List.concat
+              [ (List.map (\x -> MList.li [] [ MList.content [] [x]]) controls)
+              , [ MList.li [] <| [ MList.content []
+                  [ Button.render Mdl (id ++ [4]) mdl
+                      [ Button.raised
+                      , Button.ripple
+                      , Button.onClick <| SubQuestionAdded id
+                      , Button.colored
+                      ]
+                      [ text "Add sub-question" ]
+                  ]]
+                ]
+              ]
+          ]
 
     _ -> text ""
 
-renderOption : QuestionId -> Option -> Html Msg
-renderOption questionId option =
+renderOption : QuestionId -> Mdl -> Option -> Html Msg
+renderOption questionId mdl option =
   div []
     [ input
         [ type' "text"
@@ -107,5 +145,5 @@ renderOption questionId option =
         , onInput (QuestionUpdated questionId << MultipleChoiceOptionUpdated option.id)
         , value option.value
         ] [ text option.value ]
-    , R.removeButton <| QuestionUpdated questionId <| MultipleChoiceOptionRemoved option.id
+    , R.removeButton questionId mdl <| QuestionUpdated questionId <| MultipleChoiceOptionRemoved option.id
     ]

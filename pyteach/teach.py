@@ -7,9 +7,9 @@ import os
 
 import sys
 sys.path.insert(0, os.getenv("HOME") + '/teach/Examples/') 
-sys.path.insert(0, os.getenv("HOME") + '/phd-code/utils/')
 
-import utilities as utils
+#sys.path.insert(0, os.getenv("HOME") + '/phd-code/utils/')
+#import utilities as utils
 
 #import slate
 import pdfminer
@@ -18,6 +18,8 @@ from PIL import Image
 
 import page_analysis as pa
 import pdf_scanner as ps
+
+import json
 
 import optparse
 
@@ -56,8 +58,10 @@ def main():
 	#							x1=char[3], y1=char[4]) )
 	#lines = pa.sort_into_lines(chars)
 	
+
 	lines = pa.sort_into_lines(_chars, ctype = 'tuple')
-	groups = pa.groups_from_lines(lines, distance_lim=20, ctype='tuple')
+	groups = pa.groups_from_lines(lines, ctype='tuple')
+
 
 	for ig, group in enumerate(groups):
 		print '\r\n Group no. ' + str(ig) + ' text:  \r\n'
@@ -71,6 +75,21 @@ def main():
 		print groupstr
 
 	#pdb.set_trace()
+
+	## Make group dictionary for json storage:
+	ctype = 'tuple'
+	gdict = {}
+	for ig, group in enumerate(groups):
+		if ctype == 'tuple':	gdict[str(ig)] = group
+		else: 
+			tuple_group = []
+			for ic, char in group:
+				tuple_group.append(char.text, char.x0, \
+					char.x1, char.y0, char.y1, char.line_no)
+			gdict[str(ig)] = tuple_group	
+
+
+	with open ('groups.json','w') as f: json.dump(gdict, f, indent=4)
 
 	#utils.mpl2tex()
 
