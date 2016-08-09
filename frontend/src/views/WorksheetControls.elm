@@ -11,6 +11,10 @@ import Views.QuestionControl exposing (renderControl)
 import Material
 import Material.Button as Button
 import Material.List as MList
+import Material.Textfield as Textfield
+import Material.Typography as Typo
+import Material.Options as Options exposing (css)
+import Views.Resources as R
 
 type alias Mdl =
   Material.Model
@@ -21,11 +25,17 @@ renderWorksheetControls model =
     controls = List.indexedMap (renderControl [] model.mdl <| List.length model.questions) model.questions
   in
     div []
-      [ h1 [ style panelHeading
-           , contenteditable True
-           , on "blur" (Json.map FormTitleUpdated targetTextContent)
-           , value model.title
-           ] [ text model.title ]
+      [ Options.div
+          [ Typo.center
+          , css "padding" "24px 24px 0 24px"
+          ]
+          [ Textfield.render Mdl [0] model.mdl
+              [ Textfield.onInput FormTitleUpdated
+              , Textfield.value model.title
+              , Textfield.label R.titlePlaceholder
+              , css "width" "100%"
+              ]
+          ]
       , div []
           [ MList.ul [] <| List.concat
               [ (List.map (\x -> MList.li [] [ MList.content [] [x]]) controls)

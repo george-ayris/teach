@@ -16,4 +16,4 @@ main =
 
 init : (Model, Cmd Msg)
 init =
-  (Model "My Worksheet" [] Material.model, Cmd.none)
+  (Model "" [] Material.model, Cmd.none)

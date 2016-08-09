@@ -12,11 +12,12 @@ import Material.Card as Card
 import Material.Color as Color
 import Material.Elevation as Elevation
 import Material.List as MList
-import Material.Options as Options exposing (css)
+import Material.Options as Options exposing (css, cs)
 import Material
 import Material.Textfield as Textfield
 import Material.Typography as Typo
 import Material.Button as Button
+import Material.Dialog as Dialog
 
 type alias Mdl =
   Material.Model
@@ -48,18 +49,18 @@ renderControl parentIds mdl listLength index ({ questionType, title, questionNum
         []
         [ Options.div
             [ Typo.right ]
-            [ --R.addImageButton questionId mdl <| ShowImageUploadDialog questionId
-             upButton
+            [ R.addImageButton questionId mdl
+            , upButton
             , downButton
             , R.removeButton questionId mdl <| QuestionRemoved questionId
             ]
         , div []
             [ Textfield.render Mdl questionId mdl
-              [ Textfield.onInput <| QuestionUpdated questionId << TitleUpdated
-              , Textfield.label R.questionPlaceholder
-              , Textfield.textarea
-              , css "width" "100%"
-              ]
+                [ Textfield.onInput <| QuestionUpdated questionId << TitleUpdated
+                , Textfield.label R.questionPlaceholder
+                , Textfield.textarea
+                , css "width" "100%"
+                ]
             ]
         , select
             [ onInput <| questionTypeChanged questionId ]
@@ -122,7 +123,7 @@ renderQuestionSpecificControl id mdl ({ questionType, title } as question) =
           [ MList.ul [] <| List.concat
               [ (List.map (\x -> MList.li [] [ MList.content [] [x]]) controls)
               , [ MList.li [] <| [ MList.content []
-                  [ Button.render Mdl (id ++ [4]) mdl
+                  [ Button.render Mdl (id ++ [5]) mdl
                       [ Button.raised
                       , Button.ripple
                       , Button.onClick <| SubQuestionAdded id
@@ -139,11 +140,11 @@ renderQuestionSpecificControl id mdl ({ questionType, title } as question) =
 renderOption : QuestionId -> Mdl -> Option -> Html Msg
 renderOption questionId mdl option =
   div []
-    [ input
-        [ type' "text"
-        , placeholder R.optionPlaceholder
-        , onInput (QuestionUpdated questionId << MultipleChoiceOptionUpdated option.id)
-        , value option.value
-        ] [ text option.value ]
+    [ Textfield.render Mdl (questionId ++ [option.id]) mdl
+        [ Textfield.onInput <| QuestionUpdated questionId << MultipleChoiceOptionUpdated option.id
+        , Textfield.label R.optionPlaceholder
+        , Textfield.text'
+        , cs "textfield-list-element"
+        ]
     , R.removeButton questionId mdl <| QuestionUpdated questionId <| MultipleChoiceOptionRemoved option.id
     ]

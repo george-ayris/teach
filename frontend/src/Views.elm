@@ -9,7 +9,12 @@ import Messages exposing (..)
 import Views.Styling exposing (..)
 import Views.WorksheetOutput exposing (renderWorksheetOutput)
 import Views.WorksheetControls exposing (renderWorksheetControls)
+import Material
+import Material.Dialog as Dialog
+import Views.Resources as R
 
+type alias Mdl =
+  Material.Model
 
 view : Model -> Html Msg
 view model =
@@ -19,25 +24,22 @@ view model =
     , div [ style columnSpacer ] []
     , div [ style mainPanel ] [ renderWorksheetOutput model ]
     , div [ style columnSpacer ] []
-    --, Dialog.view <| Maybe.map imageUpload Nothing
+    , dialog [1] model.mdl
     ]
 
--- imageUpload : QuestionId -> Dialog.Config Msg
--- imageUpload questionId =
---   let
---     elementId = "imageUpload" ++ (toString questionId)
---     body = div []
---             [ input
---               [ type' "file"
---               , accept "image/*"
---               , id elementId
---               , on "change" (Json.succeed <| ImageUploaded { questionId = questionId, elementId = elementId })
---               ]
---               []
---             ]
---   in
---     { closeMessage = Just CloseImageUploadDialog
---     , header = Nothing
---     , body = Just body
---     , footer = Nothing
---     }
+dialog : QuestionId -> Mdl -> Html Msg
+dialog questionId mdl =
+  let
+    elementId = "imageUpload" ++ (toString questionId)
+  in
+    Dialog.view []
+        [ Dialog.content []
+            [ input
+              [ type' "file"
+              , accept "image/*"
+              , id elementId
+              , on "change" (Json.succeed <| ImageUploaded { questionId = questionId, elementId = elementId })
+              ] []
+            , R.closeDialogButton questionId mdl
+            ]
+        ]
