@@ -10,34 +10,41 @@ import Views.Styling exposing (..)
 import Material
 import Material.Button as Button
 import Material.Icon as Icon
+import Material.Dialog as Dialog
+import Material.Options exposing (Property)
 
 type alias Mdl =
   Material.Model
 
+titlePlaceholder = "Your worksheet title"
 questionPlaceholder = "What do you want to ask?"
 optionPlaceholder = "Option X"
 
 removeButton : QuestionId -> Mdl -> Msg -> Html Msg
 removeButton id mdl msg =
-  iconButton (id ++ [0]) mdl msg "close"
+  iconButton (id ++ [0]) mdl (Button.onClick msg) "close"
 
 upButton : QuestionId -> Mdl -> Msg -> Html Msg
 upButton id mdl msg =
-  iconButton (id ++ [1]) mdl msg "arrow_upward"
+  iconButton (id ++ [1]) mdl (Button.onClick msg) "arrow_upward"
 
 downButton : QuestionId -> Mdl -> Msg -> Html Msg
 downButton id mdl msg =
-  iconButton (id ++ [2]) mdl msg "arrow_downward"
+  iconButton (id ++ [2]) mdl (Button.onClick msg) "arrow_downward"
 
-addImageButton : QuestionId -> Mdl -> Msg -> Html Msg
-addImageButton id mdl msg =
-  iconButton (id ++ [3]) mdl msg "insert_photo"
+addImageButton : QuestionId -> Mdl -> Html Msg
+addImageButton id mdl =
+  iconButton (id ++ [3]) mdl (Dialog.openOn "click") "insert_photo"
 
-iconButton : QuestionId -> Mdl -> Msg -> String -> Html Msg
-iconButton id mdl msg icon =
+closeDialogButton : QuestionId -> Mdl -> Html Msg
+closeDialogButton id mdl =
+  iconButton (id ++ [4]) mdl (Dialog.closeOn "click") "close"
+
+iconButton : QuestionId -> Mdl -> Property { disabled : Bool, onClick : Maybe (Attribute Msg), ripple : Bool } Msg -> String -> Html Msg
+iconButton id mdl prop icon =
   Button.render Mdl id mdl
     [ Button.icon
     , Button.ripple
-    , Button.onClick msg
+    , prop
     ]
     [ Icon.i icon ]

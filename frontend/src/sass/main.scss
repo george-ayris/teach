@@ -1,1 +1,14 @@
 //@import "material";
+
+.textfield-list-element.mdl-textfield {
+  padding-top: 5px;
+  padding-bottom: 5px;
+
+  & > .mdl-textfield__label {
+    top: 9px;
+  }
+
+  & > .mdl-textfield__label:after {
+    bottom: 5px;
+  }
+}
