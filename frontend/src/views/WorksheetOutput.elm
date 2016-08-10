@@ -12,8 +12,7 @@ import Views.Resources as R
 renderWorksheetOutput : Model -> Html Msg
 renderWorksheetOutput model =
   div [ id "output" ]
-    [ button [ onClick RenderPdf ] [ text "Render output to pdf" ]
-    , h1 [ style panelHeading ] [ text <| if model.title == "" then R.titlePlaceholder else model.title ]
+    [ h1 [ style panelHeading ] [ text <| if model.title == "" then R.titlePlaceholder else model.title ]
     , div [] (List.indexedMap (renderOutput <| List.length model.questions) model.questions)
     ]
 

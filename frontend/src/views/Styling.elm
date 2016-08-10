@@ -8,6 +8,7 @@ mainContainer =
   List.concat
     [ horizontalCenteredLayout
     , globalStyles
+    , [ paddingTop "16px" ]
     ]
 
 mainPanel =
@@ -16,10 +17,6 @@ mainPanel =
   , paddingBottom standardPadding
   , flexGrow "5"
   , minWidth (px 300)
-  , borderColor (color' Color.green)
-  , borderWidth (px 5)
-  , borderRadius (px 10)
-  , borderStyle "solid"
   ]
 
 columnSpacer =
