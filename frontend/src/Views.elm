@@ -10,7 +10,11 @@ import Views.Styling exposing (..)
 import Views.WorksheetOutput exposing (renderWorksheetOutput)
 import Views.WorksheetControls exposing (renderWorksheetControls)
 import Material
+import Material.Elevation as Elevation
+import Material.Button as Button
 import Material.Dialog as Dialog
+import Material.Layout as Layout
+import Material.Options as Options
 import Views.Resources as R
 
 type alias Mdl =
@@ -18,14 +22,40 @@ type alias Mdl =
 
 view : Model -> Html Msg
 view model =
-  div [ style mainContainer ]
-    [ div [ style columnSpacer ] []
-    , div [ style mainPanel ] [ renderWorksheetControls model ]
-    , div [ style columnSpacer ] []
-    , div [ style mainPanel ] [ renderWorksheetOutput model ]
-    , div [ style columnSpacer ] []
-    , dialog [1] model.mdl
-    ]
+  Layout.render Mdl model.mdl
+    [ Layout.fixedHeader ]
+    { header =
+        [ Layout.row []
+            [ Layout.title [] [ text "Teach" ]
+            , Layout.spacer
+            , Layout.navigation []
+                [ Button.render Mdl [0] model.mdl
+                    [ Button.ripple
+                    , Button.onClick RenderPdf
+                    ]
+                    [ text "Create PDF" ]
+                ]
+            ]
+        ]
+    , drawer = []
+    , tabs = ([], [])
+    , main =
+      [ div [ style mainContainer ]
+          [ div [ style columnSpacer ] []
+          , Options.div
+              [ Options.attribute <| style mainPanel
+              , Elevation.e2
+              ] [ renderWorksheetControls model ]
+          , div [ style columnSpacer ] []
+          , Options.div
+              [ Options.attribute <| style mainPanel
+              , Elevation.e2
+              ] [ renderWorksheetOutput model ]
+          , div [ style columnSpacer ] []
+          , dialog [1] model.mdl
+          ]
+      ]
+    }
 
 dialog : QuestionId -> Mdl -> Html Msg
 dialog questionId mdl =

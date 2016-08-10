@@ -16,7 +16,7 @@ import Material.Options exposing (Property)
 type alias Mdl =
   Material.Model
 
-titlePlaceholder = "Your worksheet title"
+titlePlaceholder = "Your Worksheet Title"
 questionPlaceholder = "What do you want to ask?"
 optionPlaceholder = "Option X"
 
