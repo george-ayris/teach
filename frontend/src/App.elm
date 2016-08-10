@@ -2,13 +2,11 @@ import Html.App as App
 import Views exposing (view)
 import Update exposing (update)
 import Models exposing (Model)
-import Messages exposing (Msg)
+import Messages exposing (Msg(..))
 import Material
 import Material.Layout as Layout
 import Ports exposing (imageUploadedResultSubscription)
 
-type alias Mdl =
-  Material.Model
 
 init : (Model, Cmd Msg)
 init =
