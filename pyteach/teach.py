@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import os
 
 import sys
-sys.path.insert(0, os.getenv("HOME") + '/teach/Examples/') 
+sys.path.insert(0, os.getenv("HOME") + '/teach/Examples/')
 
 #sys.path.insert(0, os.getenv("HOME") + '/phd-code/utils/')
 #import utilities as utils
@@ -53,11 +53,11 @@ def main():
 
 	# convert chars into pa.char objects
 	#chars = []
-	#for char in _chars: 
+	#for char in _chars:
 	#	chars.append( pa.char(	text=char[0], x0=char[1],y0=char[2],
 	#							x1=char[3], y1=char[4]) )
 	#lines = pa.sort_into_lines(chars)
-	
+		# new line
 
 	lines = pa.sort_into_lines(_chars, ctype = 'tuple')
 	groups = pa.groups_from_lines(lines, ctype='tuple')
@@ -67,7 +67,7 @@ def main():
 		print '\r\n Group no. ' + str(ig) + ' text:  \r\n'
 		groupstr = ''
 		for char in group:
-			try: 
+			try:
 				charstr = str(char[0])
 				groupstr += charstr
 			except:
@@ -81,12 +81,12 @@ def main():
 	gdict = {}
 	for ig, group in enumerate(groups):
 		if ctype == 'tuple':	gdict[str(ig)] = group
-		else: 
+		else:
 			tuple_group = []
 			for ic, char in group:
 				tuple_group.append(char.text, char.x0, \
 					char.x1, char.y0, char.y1, char.line_no)
-			gdict[str(ig)] = tuple_group	
+			gdict[str(ig)] = tuple_group
 
 
 	with open ('groups.json','w') as f: json.dump(gdict, f, indent=4)
@@ -116,11 +116,6 @@ def main():
 
 
 if __name__ == "__main__":
-	
+
 
 	main()
-
-
-
-
-
