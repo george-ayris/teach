@@ -33,6 +33,7 @@ update msg ({questions} as model) =
                                   , title = ""
                                   , questionNumber = (List.length questions) + 1
                                   , image = Nothing
+                                  , isExpanded = True
                                   }]
       } ! []
 
@@ -86,6 +87,12 @@ update msg ({questions} as model) =
 
         MultipleChoiceOptionUpdated optionId newValue ->
           { model | questions = updateQuestionWithId (updateMultipleChoiceOption optionId newValue) id questions } ! []
+
+        Collapse ->
+          { model | questions = updateQuestionWithId collapse id questions } ! []
+
+        Expand ->
+          { model | questions = updateQuestionWithId expand id questions } ! []
 
 moveQuestion : QuestionId -> QuestionId -> List Question -> List Question
 moveQuestion oldQuestionId questionIdToMoveAfter questions =
@@ -176,6 +183,14 @@ mapOntoQuestionsInHierachy processQuestions questionId questions =
 
     _ -> questions
 
+expand : Question -> Question
+expand question =
+  { question | isExpanded = True }
+
+collapse : Question -> Question
+collapse question =
+  { question | isExpanded = False }
+
 addImage : ImageUploadedResult -> Question -> Question
 addImage { name, result } question =
   { question | image = Just { data = result, name = name } }
@@ -188,6 +203,7 @@ addSubQuestion =
                        , title = ""
                        , questionNumber = (List.length subQuestions) + 1
                        , image = Nothing
+                       , isExpanded = True
                        }]
   in
    mapOntoSubQuestions addSubQuestion'

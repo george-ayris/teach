@@ -40,7 +40,7 @@ renderWorksheetControls model =
           [ MList.ul [] <| List.concat
               [ (List.map (\x -> MList.li [] [ MList.content [] [x]]) controls)
               , [ MList.li [] <| [ MList.content []
-                  [ Button.render Mdl [0] model.mdl
+                  [ Button.render Mdl [0,1] model.mdl
                       [ Button.raised
                       , Button.ripple
                       , Button.onClick QuestionAdded

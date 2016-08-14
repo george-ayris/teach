@@ -48,24 +48,47 @@ renderControl parentIds mdl listLength index ({ questionType, title, questionNum
       [ Card.text
         []
         [ Options.div
-            [ Typo.right ]
-            [ R.addImageButton questionId mdl
-            , upButton
-            , downButton
-            , R.removeButton questionId mdl <| QuestionRemoved questionId
+            [ css "display" "flex"
+            , css "justify-content" "space-between"
             ]
-        , div []
-            [ Textfield.render Mdl questionId mdl
-                [ Textfield.onInput <| QuestionUpdated questionId << TitleUpdated
-                , Textfield.label R.questionPlaceholder
-                , Textfield.textarea
-                , css "width" "100%"
+            [ Options.div
+                []
+                [ if question.isExpanded
+                  then R.questionIsExpanded questionId mdl <| QuestionUpdated questionId Collapse
+                  else R.questionIsCollapsed questionId mdl <| QuestionUpdated questionId Expand
+                ]
+            , Options.div
+                []
+                [ R.addImageButton questionId mdl
+                , upButton
+                , downButton
+                , R.removeButton questionId mdl <| QuestionRemoved questionId
                 ]
             ]
-        , select
-            [ onInput <| questionTypeChanged questionId ]
-            (renderQuestionTypes questionId questionType)
-        , renderQuestionSpecificControl questionId mdl question
+        , if question.isExpanded
+          then
+            div []
+              [ div []
+                  [ Textfield.render Mdl questionId mdl
+                      [ Textfield.onInput <| QuestionUpdated questionId << TitleUpdated
+                      , Textfield.label R.questionPlaceholder
+                      , Textfield.textarea
+                      , css "width" "100%"
+                      ]
+                  ]
+                , select
+                    [ onInput <| questionTypeChanged questionId ]
+                    (renderQuestionTypes questionId questionType)
+                , renderQuestionSpecificControl questionId mdl question
+              ]
+          else
+            div []
+                [ Textfield.render Mdl questionId mdl
+                    [ Textfield.onInput <| QuestionUpdated questionId << TitleUpdated
+                    , Textfield.label R.questionPlaceholder
+                    , css "width" "100%"
+                    ]
+                ]
         ]
       ]
 

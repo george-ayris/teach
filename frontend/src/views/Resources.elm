@@ -40,6 +40,14 @@ closeDialogButton : QuestionId -> Mdl -> Html Msg
 closeDialogButton id mdl =
   iconButton (id ++ [4]) mdl (Dialog.closeOn "click") "close"
 
+questionIsCollapsed : QuestionId -> Mdl -> Msg -> Html Msg
+questionIsCollapsed id mdl msg =
+  iconButton (id ++ [5]) mdl (Button.onClick msg) "expand_more"
+
+questionIsExpanded : QuestionId -> Mdl -> Msg -> Html Msg
+questionIsExpanded id mdl msg =
+  iconButton (id ++ [6]) mdl (Button.onClick msg) "expand_less"
+
 iconButton : QuestionId -> Mdl -> Property { disabled : Bool, onClick : Maybe (Attribute Msg), ripple : Bool } Msg -> String -> Html Msg
 iconButton id mdl prop icon =
   Button.render Mdl id mdl
