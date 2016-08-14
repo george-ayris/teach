@@ -13,6 +13,7 @@ type alias Question =
   , questionType : QuestionType
   , title : String
   , image : Maybe Image
+  , isExpanded : Bool
   }
 
 type alias Image =

@@ -21,6 +21,8 @@ type UpdateType
   | MultipleChoiceOptionAdded
   | MultipleChoiceOptionRemoved Int
   | MultipleChoiceOptionUpdated Int String
+  | Collapse
+  | Expand
 
 type alias QuestionOrderingInfo =
   { oldQuestionId : QuestionId
