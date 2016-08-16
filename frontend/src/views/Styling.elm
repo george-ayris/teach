@@ -15,12 +15,12 @@ mainPanel =
   [ paddingLeft standardPadding
   , paddingRight standardPadding
   , paddingBottom standardPadding
-  , flexGrow "5"
-  , minWidth (px 300)
+  , width "44vw"
+  , ("box-sizing", "border-box")
   ]
 
 columnSpacer =
-  [ flexGrow "1" ]
+  [ width "4vw" ]
 
 panelHeading =
   centeredText
@@ -46,7 +46,7 @@ questionImage =
   ]
 
 subQuestionContainer =
-  [ paddingLeft standardPadding ]
+  [ ]
 
 writtenQuestionInput =
   [ ("box-sizing", "border-box")
@@ -63,6 +63,7 @@ globalStyles =
 
 horizontalCenteredLayout =
   [ display flex'
+  , ("justify-content", "space-around")
   ]
 
 centeredText =

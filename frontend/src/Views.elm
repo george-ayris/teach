@@ -41,17 +41,14 @@ view model =
     , tabs = ([], [])
     , main =
       [ div [ style mainContainer ]
-          [ div [ style columnSpacer ] []
-          , Options.div
+          [ Options.div
               [ Options.attribute <| style mainPanel
               , Elevation.e2
               ] [ renderWorksheetControls model ]
-          , div [ style columnSpacer ] []
           , Options.div
               [ Options.attribute <| style mainPanel
               , Elevation.e2
               ] [ renderWorksheetOutput model ]
-          , div [ style columnSpacer ] []
           , dialog [1] model.mdl
           ]
       ]

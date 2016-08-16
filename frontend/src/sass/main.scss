@@ -1,14 +1,27 @@
 //@import "material";
 
-.textfield-list-element.mdl-textfield {
-  padding-top: 5px;
-  padding-bottom: 5px;
+.textfield__list-element.mdl-textfield {
+  padding-top: 4px;
+  padding-bottom: 4px;
 
   & > .mdl-textfield__label {
-    top: 9px;
+    top: 8px;
   }
 
   & > .mdl-textfield__label:after {
-    bottom: 5px;
+    bottom: 4px;
+  }
+}
+
+.textfield__minimised.mdl-textfield {
+  padding-top: 0px;
+  padding-bottom: 0px;
+
+  & > .mdl-textfield__label {
+    top: 4px;
+  }
+
+  & > .mdl-textfield__label:after {
+    bottom: 0px;
   }
 }
