@@ -21,6 +21,9 @@ https://george-ayris.github.io/teach/
 - Fill in the blank questions (with optional wordbank)
 - Clone question
 - Record question answers?
+- Tables
+- Twinkle pre-made resources
+- Customise question numbers
 
 ## LC
 - Get text in correct order inside group
@@ -32,6 +35,7 @@ https://george-ayris.github.io/teach/
 - Colour questions?
 
 # Bugs/Tech debt
+- Rendering on question collapse/expand
 - Max on number of sub questions
 - Properly deal with limit to nesting in sub questions
 - Switch on warn flag in compiler  
