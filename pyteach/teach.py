@@ -16,6 +16,8 @@ import pdfminer
 #import pytesseract
 from PIL import Image
 
+import enchant
+
 import page_analysis as pa
 import pdf_scanner as ps
 
@@ -76,30 +78,24 @@ def main():
 
     #pdb.set_trace()
 
-    ## Make group dictionary for json storage:
-    ctype = 'tuple'
-    gdict = {'title': 'Worksheet'}
-    glist = []
-    for ig, group in enumerate(groups):
-        if ctype == 'tuple':    gdict[str(ig)] = group
-        else:
-            tuple_group = []
-            for ic, char in group:
-                tuple_group.append(char.text, char.x0, \
-                    char.x1, char.y0, char.y1, char.line_no)
-            gdict[str(ig)] = tuple_group
+    questions = pa.questions_from_groups(groups, ctype='tuple')
 
-    with open ('groups.json','w') as f: json.dump(gdict, f, indent=4)
+    for question in questions:
+        print question
+
+    pdb.set_trace()
 
     gdict = {'title': 'Worksheet'}
-    glist = []
-    for ig, group in enumerate(groups):
-        sentence = ''
-        for char in group:
-            try: letter = str(char[0])
-            except: pass
-            sentence += letter
-        pdb.set_trace() 
+    qlist = []
+    for iq, question in enumerate(questions):
+        qdict = {}
+        qdict['quesion'] = question
+        qdict['type'] = "Medium Answer"
+        qdict['typeinfo'] = {}
+        qdict['image'] = []
+        qlist.append(qdict)
+    gdict['questions'] = qlist
+    with open ('questions.json','w') as f: json.dump(gdict, f, indent=4)
 
     #{
       #title: "My First Worksheet",

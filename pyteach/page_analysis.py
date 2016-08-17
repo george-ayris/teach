@@ -5,6 +5,7 @@ import subprocess
 import copy
 import time
 import unicodedata 
+import enchant
 
 class char():
     def __init__(self, **kwargs):
@@ -207,19 +208,19 @@ def groups_from_lines(lines, ctype='obj'):
                     spacechar = (u' ', sc[1], sc[2], sc[3], sc[4])
                 else:
                     spacechar = sc
-                    spacechar.char = u' '
+                    spacechar.text = u' '
                 ordered_group += [spacechar] # new line = space
         new_groups.append(ordered_group)
 
 
-    # Now sort all groups by height order (using the first char as reference)
+    # Now sort all groups by height order (using the first char as reference)  
     heights = []
     for group in new_groups: 
         #pdb.set_trace()
         if ctype=='tuple':
             heights.append(-group[0][2])
         else:
-            heights.append(-group.y0)
+            heights.append(-group[0].y0)
     inds = np.argsort(np.array(heights))
     groups = [new_groups[ii] for ii in inds]
 
@@ -227,3 +228,33 @@ def groups_from_lines(lines, ctype='obj'):
     print 'Time to group: ' + str(t1-t0)
 
     return groups
+
+
+def questions_from_groups(groups, ctype='tuple'):
+
+    ench = enchant.Dict('en_GB')
+    questions = []
+    # establish whether groups 
+    for ig, group in enumerate(groups):
+        sentence, num_words = '', 0
+        for char in group:
+            try: 
+                if ctype == 'tuple': 
+                    letter = str(char[0])
+                else: 
+                    letter = char.text
+            except:
+                pass
+            sentence += letter
+        for word in sentence.split():
+            if ench.check(word): 
+                num_words += 1
+        if num_words > 1: 
+            bQuestion = True
+            questions.append(sentence) 
+
+
+    return questions 
+
+
+
