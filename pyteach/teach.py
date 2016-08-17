@@ -4,25 +4,16 @@ import subprocess
 import copy
 import matplotlib.pyplot as plt
 import os
-
 import sys
 sys.path.insert(0, os.getenv("HOME") + '/teach/Examples/')
-
-#sys.path.insert(0, os.getenv("HOME") + '/phd-code/utils/')
-#import utilities as utils
-
 #import slate
 import pdfminer
 #import pytesseract
 from PIL import Image
-
 import enchant
-
 import page_analysis as pa
 import pdf_scanner as ps
-
 import json
-
 import optparse
 
 def main():
@@ -35,7 +26,6 @@ def main():
 
     base_dir = os.getenv("HOME")
     input_doc = base_dir + '/teach/Examples/' + filename
-
 
     #textstr = pytesseract.image_to_string(Image.open('units01.jpg'))
     #print textstr
@@ -83,9 +73,11 @@ def main():
     for question in questions:
         print question
 
-    pdb.set_trace()
+    #pdb.set_trace()
 
-    gdict = {'title': 'Worksheet'}
+    name = filename.split('.')[0] 
+    namejson = name + '_questions.json'
+    gdict = {'title': name}
     qlist = []
     for iq, question in enumerate(questions):
         qdict = {}
@@ -95,7 +87,7 @@ def main():
         qdict['image'] = []
         qlist.append(qdict)
     gdict['questions'] = qlist
-    with open ('questions.json','w') as f: json.dump(gdict, f, indent=4)
+    with open (namejson,'w') as f: json.dump(gdict, f, indent=4)
 
     #{
       #title: "My First Worksheet",
