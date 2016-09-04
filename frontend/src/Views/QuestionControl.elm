@@ -1,5 +1,7 @@
 module Views.QuestionControl exposing (renderControl)
 
+import Views.QuestionOutput exposing (toStringQuestionNumber)
+
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -7,17 +9,17 @@ import Models exposing (..)
 import Messages exposing (..)
 import Views.Styling exposing (..)
 import Views.Resources as R
-import Json.Decode as Json
+--import Json.Decode as Json
 import Material.Card as Card
-import Material.Color as Color
+--import Material.Color as Color
 import Material.Elevation as Elevation
 import Material.List as MList
 import Material.Options as Options exposing (css, cs)
 import Material
 import Material.Textfield as Textfield
-import Material.Typography as Typo
+--import Material.Typography as Typo
 import Material.Button as Button
-import Material.Dialog as Dialog
+--import Material.Dialog as Dialog
 
 type alias Mdl =
   Material.Model
@@ -60,7 +62,21 @@ renderControl parentIds mdl listLength index ({ questionType, title, questionNum
                   else R.questionIsCollapsed questionId mdl <| QuestionUpdated questionId Expand
                 ]
             , if question.isExpanded
-              then text ""
+              then
+                Options.div
+                  [ css "flex-grow" "1"
+                  , css "padding-left" "4px"
+                  , css "padding-right" "4px"
+                  ]
+                  [
+                    Button.render Mdl questionId mdl
+                      [ Button.disabled
+                      , Button.raised
+                      , css "float" "left"
+                      , css "width" "5%"
+                      ]
+                      [ text <| toStringQuestionNumber questionId  ]
+                  ]
               else
                 Options.div
                   [ css "flex-grow" "1"
@@ -71,9 +87,16 @@ renderControl parentIds mdl listLength index ({ questionType, title, questionNum
                       [ Textfield.onInput <| QuestionUpdated questionId << TitleUpdated
                       , Textfield.label R.questionPlaceholder
                       , Textfield.value title
-                      , css "width" "100%"
+                      , css "width" "75%"
+                      , css "float" "right"
                       , cs "textfield__minimised"
                       ]
+                  , Button.render Mdl questionId mdl
+                      [ Button.disabled
+                      , Button.raised
+                      , css "float" "left"
+                      ]
+                      [ text <| toStringQuestionNumber questionId  ]
                   ]
             , Options.div
                 []
@@ -87,14 +110,16 @@ renderControl parentIds mdl listLength index ({ questionType, title, questionNum
           then
             div []
               [ div []
-                  [ Textfield.render Mdl questionId mdl
+                    [ Textfield.render Mdl questionId mdl
                       [ Textfield.onInput <| QuestionUpdated questionId << TitleUpdated
                       , Textfield.label R.questionPlaceholder
                       , Textfield.textarea
                       , Textfield.value title
+                      , Textfield.rows 3
                       , css "width" "100%"
+                      , css "float" "right"
                       ]
-                  ]
+                    ]
                 , select
                     [ onInput <| questionTypeChanged questionId ]
                     (renderQuestionTypes questionId questionType)
@@ -117,6 +142,7 @@ renderQuestionTypes id selectedOption =
       , LongAnswer
       , TrueFalse
       , MultipleChoice { options = [], uid = 0 }
+      , FillBlanks { options = [], uid = 0 }
       ]
   in
     if List.length id > 2
@@ -139,11 +165,18 @@ prettyPrint questionType =
     LongAnswer -> "Long answer"
     TrueFalse -> "True/false"
     MultipleChoice _ -> "Multiple choice"
+    FillBlanks _ -> "Fill the blanks"
     SubQuestionContainer _ -> "Or add a sub-question"
 
 renderQuestionSpecificControl : QuestionId -> Mdl -> Question -> Html Msg
 renderQuestionSpecificControl id mdl ({ questionType, title } as question) =
   case questionType of
+    FillBlanks { options } ->
+      div [] <| List.concat
+        [ List.map (renderWord id mdl) options
+        , [ div [] [ button [ onClick <| QuestionUpdated id MultipleChoiceOptionAdded ] [ text "Add word to bank" ]]]
+        ]
+
     MultipleChoice { options } ->
       div [] <| List.concat
         [ List.map (renderOption id mdl) options
@@ -178,6 +211,18 @@ renderOption questionId mdl option =
     [ Textfield.render Mdl (questionId ++ [option.id]) mdl
         [ Textfield.onInput <| QuestionUpdated questionId << MultipleChoiceOptionUpdated option.id
         , Textfield.label R.optionPlaceholder
+        , Textfield.text'
+        , cs "textfield__list-element"
+        ]
+    , R.removeButton questionId mdl <| QuestionUpdated questionId <| MultipleChoiceOptionRemoved option.id
+    ]
+
+renderWord : QuestionId -> Mdl -> Option -> Html Msg
+renderWord questionId mdl option =
+  div []
+    [ Textfield.render Mdl (questionId ++ [option.id]) mdl
+        [ Textfield.onInput <| QuestionUpdated questionId << MultipleChoiceOptionUpdated option.id
+        , Textfield.label "Word for bank"
         , Textfield.text'
         , cs "textfield__list-element"
         ]

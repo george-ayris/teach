@@ -48,7 +48,7 @@ questionIsExpanded : QuestionId -> Mdl -> Msg -> Html Msg
 questionIsExpanded id mdl msg =
   iconButton (id ++ [6]) mdl (Button.onClick msg) "expand_less"
 
-iconButton : QuestionId -> Mdl -> Property { disabled : Bool, onClick : Maybe (Attribute Msg), ripple : Bool } Msg -> String -> Html Msg
+iconButton : QuestionId -> Mdl -> Button.Property Msg -> String -> Html Msg
 iconButton id mdl prop icon =
   Button.render Mdl id mdl
     [ Button.icon

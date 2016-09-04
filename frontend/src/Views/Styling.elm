@@ -15,7 +15,7 @@ mainPanel =
   [ paddingLeft standardPadding
   , paddingRight standardPadding
   , paddingBottom standardPadding
-  , width "44vw"
+  , width "46vw"
   , ("box-sizing", "border-box")
   ]
 

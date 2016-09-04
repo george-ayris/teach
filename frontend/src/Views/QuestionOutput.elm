@@ -1,4 +1,4 @@
-module Views.QuestionOutput exposing (renderQuestionOutput)
+module Views.QuestionOutput exposing (renderQuestionOutput, toStringQuestionNumber)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -28,10 +28,10 @@ toStringQuestionNumber : QuestionId -> String
 toStringQuestionNumber id =
   case id of
     (a::b::c::[]) ->
-      Utils.numberToRoman c
+      String.toLower <| Utils.numberToRoman c
 
     (a::b::[]) ->
-      Utils.numberToLetter b
+      String.toLower <| Utils.numberToLetter b
 
     (a::[]) ->
       toString a
@@ -54,13 +54,29 @@ questionSpecificContent id { questionType } =
       Html.form [] (List.map (renderMultipleChoiceOutput id) [{ value = "True" }, { value = "False" }])
 
     MultipleChoice { options } ->
-      Html.form [] (List.map (renderMultipleChoiceOutput id) options)
+      Html.form [] (List.map (renderFillBlanksOutput id) options)
+
+    FillBlanks { options } ->
+      if List.length options > 0 then
+        div []
+        [ text ( "Word Bank: " )
+        , text ( String.append (String.join ", "  <| List.map (\ a -> a.value) options ) "." )
+        ]
+      else
+       div [] []
 
     SubQuestionContainer questions ->
       div [ style subQuestionContainer ] (List.map (renderQuestionOutput id) questions)
 
 renderMultipleChoiceOutput : QuestionId -> { a | value : String } -> Html Msg
 renderMultipleChoiceOutput id option =
+  div []
+   [ input [ type' "radio", name <| "Question " ++ (toString id), value option.value ] []
+   , text (if String.isEmpty option.value then R.optionPlaceholder else option.value)
+   ]
+
+renderFillBlanksOutput : QuestionId -> { a | value : String } -> Html Msg
+renderFillBlanksOutput id option =
   div []
    [ input [ type' "radio", name <| "Question " ++ (toString id), value option.value ] []
    , text (if String.isEmpty option.value then R.optionPlaceholder else option.value)

@@ -21,6 +21,7 @@ type UpdateType
   | MultipleChoiceOptionAdded
   | MultipleChoiceOptionRemoved Int
   | MultipleChoiceOptionUpdated Int String
+  | ChangedToFillBlank
   | Collapse
   | Expand
 

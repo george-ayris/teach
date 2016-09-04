@@ -29,6 +29,7 @@ type QuestionType
   | LongAnswer
   | TrueFalse
   | MultipleChoice MultipleChoiceInfo
+  | FillBlanks MultipleChoiceInfo
   | SubQuestionContainer (List Question)
 
 type alias MultipleChoiceInfo =
@@ -41,6 +42,7 @@ type alias Option =
   , value : String
   }
 
+
 questionTypeToString : QuestionType -> String
 questionTypeToString questionType =
   case questionType of
@@ -50,6 +52,7 @@ questionTypeToString questionType =
     TrueFalse -> "TrueFalse"
     MultipleChoice _ -> "MultipleChoice"
     SubQuestionContainer _ -> "SubQuestionContainer"
+    FillBlanks _ -> "FillBlanks"
 
 stringToQuestionType : String -> QuestionType
 stringToQuestionType string =
@@ -57,5 +60,6 @@ stringToQuestionType string =
   else if string == "MediumAnswer" then MediumAnswer
   else if string == "LongAnswer" then LongAnswer
   else if string == "TrueFalse" then TrueFalse
+      else if string == "FillBlanks" then FillBlanks { options = [], uid = 0 }
   else if string == "MultipleChoice" then MultipleChoice { options = [], uid = 0 }
   else SubQuestionContainer []
