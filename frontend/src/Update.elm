@@ -1,6 +1,6 @@
 module Update exposing (update)
 
-import Utils
+--import Utils
 import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo, QuestionId)
 import Messages exposing (Msg(..), UpdateType(..), QuestionOrderingInfo, ImageUploadedResult)
 import Update.Extra exposing (andThen)
@@ -33,7 +33,7 @@ update msg ({questions} as model) =
                                   , title = ""
                                   , questionNumber = (List.length questions) + 1
                                   , image = Nothing
-                                  , isExpanded = True
+                                  , isExpanded = False
                                   }]
       } ! []
 
@@ -53,8 +53,12 @@ update msg ({questions} as model) =
 
         TypeChanged newType ->
           let
+            --chainUpdates : (Model, Cmd Msg) -> (Model, Cmd Msg) -- type annotation if wanted
             chainUpdates model =
               case newType of
+                FillBlanks { options } ->
+                  model |> andThen update (QuestionUpdated id ChangedToFillBlank)
+
                 MultipleChoice { options } ->
                   if List.length options == 0
                   then model |> andThen update (QuestionUpdated id MultipleChoiceOptionAdded)
@@ -79,6 +83,9 @@ update msg ({questions} as model) =
             { model | questions = updateQuestionWithId (updateQuestionType newType) id questions } ! []
              |> chainUpdates
 
+        ChangedToFillBlank ->
+          { model | questions = updateQuestionWithId (newFillBlanksQuestion) id questions } ! []
+
         MultipleChoiceOptionAdded ->
           { model | questions = updateQuestionWithId (addMultipleChoiceOption) id questions } ! []
 
@@ -93,6 +100,7 @@ update msg ({questions} as model) =
 
         Expand ->
           { model | questions = updateQuestionWithId expand id questions } ! []
+
 
 moveQuestion : QuestionId -> QuestionId -> List Question -> List Question
 moveQuestion oldQuestionId questionIdToMoveAfter questions =
@@ -212,7 +220,10 @@ updateQuestionTitle : String -> Question -> Question
 updateQuestionTitle newTitle q = { q | title = newTitle }
 
 updateQuestionType : QuestionType -> Question -> Question
-updateQuestionType newType q = { q | questionType = newType }
+updateQuestionType newType q = { q | questionType = newType, title = "" }
+
+newFillBlanksQuestion : Question -> Question
+newFillBlanksQuestion q = { q | title = "Use ___ as blanks"}
 
 addMultipleChoiceOption : Question -> Question
 addMultipleChoiceOption =
@@ -229,7 +240,13 @@ updateMultipleChoiceOption : Int -> String -> Question -> Question
 updateMultipleChoiceOption optionId newValue =
   let
     updateOption option = { option | value = newValue }
-    updateOptions options = List.map (updateListItem updateOption optionId) options
+    updateOptions options = List.map
+                                    ( ( \ updateFunc id item ->
+                                        if item.id == id then updateFunc item else item
+                                      )
+                                      updateOption optionId
+                                    )
+                                    options
   in
     updateMultipleChoiceInfo (\x -> { x | options = updateOptions x.options })
 
@@ -241,15 +258,12 @@ updateMultipleChoiceInfo updateFunction q =
         MultipleChoice choiceInfo ->
           MultipleChoice <| updateFunction choiceInfo
 
+        FillBlanks choiceInfo ->
+          FillBlanks <| updateFunction choiceInfo
+
         _ -> question
   in
     { q | questionType = updateChoiceInfo q.questionType }
-
-updateListItem : ({ b | id : a } -> { b | id : a }) -> a -> { b | id : a } -> { b | id : a }
-updateListItem updateFunction id item =
-  if item.id == id
-  then updateFunction item
-  else item
 
 updateQuestionWithId : (Question -> Question) -> QuestionId -> List Question -> List Question
 updateQuestionWithId updateFunction questionId questions =
