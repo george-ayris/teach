@@ -12,7 +12,7 @@ import Messages exposing (..)
 renderQuestionOutput : QuestionId -> Question -> Html Msg
 renderQuestionOutput parentIds ({ questionType, title, questionNumber, image } as question) =
     let
-      title' = if String.isEmpty title then R.questionPlaceholder else title
+      title' = if String.isEmpty title then R.expandedQuestionPlaceholder else title
       questionId = parentIds ++ [ questionNumber ]
       renderImage = case image of
         Just { data } -> img [ src data, style questionImage ] []
@@ -41,20 +41,19 @@ toStringQuestionNumber id =
 questionSpecificContent : QuestionId -> Question -> Html Msg
 questionSpecificContent id { questionType } =
   case questionType of
-    ShortAnswer ->
-      textarea [ style writtenQuestionInput, rows 1, placeholder "A few words expected" ] []
 
-    MediumAnswer ->
-      textarea [ style writtenQuestionInput, rows 4, placeholder "A couple of sentences expected" ] []
-
-    LongAnswer ->
-      textarea [ style writtenQuestionInput, rows 8, placeholder "A paragraph expected" ] []
+    LongAnswer numRows ->
+        div [] [ if numRows > 0 then
+                    textarea [ style writtenQuestionInput, rows numRows, placeholder "Written text response expected" ] []
+                else
+                    div [] []
+            ]
 
     TrueFalse ->
       Html.form [] (List.map (renderMultipleChoiceOutput id) [{ value = "True" }, { value = "False" }])
 
     MultipleChoice { options } ->
-      Html.form [] (List.map (renderFillBlanksOutput id) options)
+      Html.form [] (List.map (renderMultipleChoiceOutput id) options)
 
     FillBlanks { options } ->
       if List.length options > 0 then
@@ -70,13 +69,6 @@ questionSpecificContent id { questionType } =
 
 renderMultipleChoiceOutput : QuestionId -> { a | value : String } -> Html Msg
 renderMultipleChoiceOutput id option =
-  div []
-   [ input [ type' "radio", name <| "Question " ++ (toString id), value option.value ] []
-   , text (if String.isEmpty option.value then R.optionPlaceholder else option.value)
-   ]
-
-renderFillBlanksOutput : QuestionId -> { a | value : String } -> Html Msg
-renderFillBlanksOutput id option =
   div []
    [ input [ type' "radio", name <| "Question " ++ (toString id), value option.value ] []
    , text (if String.isEmpty option.value then R.optionPlaceholder else option.value)

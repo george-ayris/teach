@@ -13,11 +13,14 @@ type Msg
   | RenderPdf
   | ImageUploaded ImageUploadedInfo
   | ImageUploadResultReceived ImageUploadedResult
+  | Dragging
   | Mdl (Material.Msg Msg)
 
 type UpdateType
   = TypeChanged QuestionType
+  | TemplateChosen TemplateType
   | TitleUpdated String
+  | AnswerLengthUpdated Int
   | MultipleChoiceOptionAdded
   | MultipleChoiceOptionRemoved Int
   | MultipleChoiceOptionUpdated Int String
