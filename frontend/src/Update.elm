@@ -1,7 +1,7 @@
 module Update exposing (update)
 
 --import Utils
-import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo, QuestionId)
+import Models exposing (Model, Question, QuestionType(..), MultipleChoiceInfo, QuestionId, TemplateType(..))
 import Messages exposing (Msg(..), UpdateType(..), QuestionOrderingInfo, ImageUploadedResult)
 import Update.Extra exposing (andThen)
 import Ports exposing (..)
@@ -29,7 +29,7 @@ update msg ({questions} as model) =
 
     QuestionAdded ->
       { model
-      | questions = questions ++ [{ questionType = ShortAnswer
+      | questions = questions ++ [{ questionType = LongAnswer 5
                                   , title = ""
                                   , questionNumber = (List.length questions) + 1
                                   , image = Nothing
@@ -42,6 +42,9 @@ update msg ({questions} as model) =
 
     QuestionOrderChanged { oldQuestionId, questionIdToMoveAfter } ->
       { model | questions = moveQuestion oldQuestionId questionIdToMoveAfter questions } ! []
+
+    Dragging ->
+      model ! []
 
     SubQuestionAdded parentId ->
       { model | questions = updateQuestionWithId addSubQuestion parentId questions } ! []
@@ -83,8 +86,14 @@ update msg ({questions} as model) =
             { model | questions = updateQuestionWithId (updateQuestionType newType) id questions } ! []
              |> chainUpdates
 
+        TemplateChosen newTemplate ->
+            { model | questions = updateQuestionWithId (useTemplate newTemplate) id questions } ! []
+
+        AnswerLengthUpdated newNumLines ->
+          { model | questions = updateQuestionWithId (updateAnswerLength newNumLines) id questions } ! []
+
         ChangedToFillBlank ->
-          { model | questions = updateQuestionWithId (newFillBlanksQuestion) id questions } ! []
+          { model | questions = updateQuestionWithId (\q -> {q | title = "Use ___ as blanks"} ) id questions } ! []
 
         MultipleChoiceOptionAdded ->
           { model | questions = updateQuestionWithId (addMultipleChoiceOption) id questions } ! []
@@ -96,10 +105,12 @@ update msg ({questions} as model) =
           { model | questions = updateQuestionWithId (updateMultipleChoiceOption optionId newValue) id questions } ! []
 
         Collapse ->
-          { model | questions = updateQuestionWithId collapse id questions } ! []
+          { model | questions = updateQuestionWithId (\q -> {q | isExpanded = False}) id questions } ! []
 
         Expand ->
-          { model | questions = updateQuestionWithId expand id questions } ! []
+          { model | questions = updateQuestionWithId (\q -> {q | isExpanded = True}) id questions } ! []
+
+
 
 
 moveQuestion : QuestionId -> QuestionId -> List Question -> List Question
@@ -191,14 +202,6 @@ mapOntoQuestionsInHierachy processQuestions questionId questions =
 
     _ -> questions
 
-expand : Question -> Question
-expand question =
-  { question | isExpanded = True }
-
-collapse : Question -> Question
-collapse question =
-  { question | isExpanded = False }
-
 addImage : ImageUploadedResult -> Question -> Question
 addImage { name, result } question =
   { question | image = Just { data = result, name = name } }
@@ -207,11 +210,11 @@ addSubQuestion : Question -> Question
 addSubQuestion =
   let
     addSubQuestion' subQuestions =
-      subQuestions ++ [{ questionType = ShortAnswer
+      subQuestions ++ [{ questionType = LongAnswer 0
                        , title = ""
                        , questionNumber = (List.length subQuestions) + 1
                        , image = Nothing
-                       , isExpanded = True
+                       , isExpanded = False
                        }]
   in
    mapOntoSubQuestions addSubQuestion'
@@ -222,8 +225,19 @@ updateQuestionTitle newTitle q = { q | title = newTitle }
 updateQuestionType : QuestionType -> Question -> Question
 updateQuestionType newType q = { q | questionType = newType, title = "" }
 
-newFillBlanksQuestion : Question -> Question
-newFillBlanksQuestion q = { q | title = "Use ___ as blanks"}
+useTemplate : TemplateType -> Question -> Question
+useTemplate template =
+    case template of
+        TrueFalseT ->
+            updateMultipleChoiceInfo (\{ options, uid }
+                -> { options = [{id = 0, value = "True"}, {id = 1, value = "False" }], uid = 2})
+
+        CustomMultChoiceT ->
+            updateMultipleChoiceInfo (\{ options, uid }
+                -> { options = [{id = 0, value = ""}], uid = 1})
+
+        _ ->
+            (\ q -> q)
 
 addMultipleChoiceOption : Question -> Question
 addMultipleChoiceOption =
@@ -235,6 +249,10 @@ removeMultipleChoiceOption optionId =
     removeOption info = { info | options = List.filter (\o -> o.id /= optionId) info.options }
   in
     updateMultipleChoiceInfo removeOption
+
+updateAnswerLength : Int -> Question -> Question
+updateAnswerLength numNewLines q =
+    { q | questionType = LongAnswer numNewLines }
 
 updateMultipleChoiceOption : Int -> String -> Question -> Question
 updateMultipleChoiceOption optionId newValue =

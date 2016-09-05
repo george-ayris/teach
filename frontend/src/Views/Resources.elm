@@ -17,7 +17,8 @@ type alias Mdl =
   Material.Model
 
 titlePlaceholder = "Your Worksheet Title"
-questionPlaceholder = "What do you want to ask?"
+questionPlaceholder = "Expand to edit..."
+expandedQuestionPlaceholder = "What do you want to ask?"
 optionPlaceholder = "Option X"
 
 removeButton : QuestionId -> Mdl -> Msg -> Html Msg
