@@ -5,6 +5,7 @@ https://george-ayris.github.io/teach/
 - Drag and drop 
   - https://groups.google.com/forum/#!topic/elm-discuss/rGgAQkgOrt0
   - https://github.com/zaboco/elm-draggable-examples/blob/master/src/SortableList.elm
+  - http://www.elmweekly.nl/2016/08/11/issue-25
 - Nesting and un-nesting existing questions
 - Editable header text at top of worksheet
 - Images in question text
